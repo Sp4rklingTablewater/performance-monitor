@@ -50,7 +50,12 @@ export default async function AthletesPage() {
                                 key={participant.id}
                                 className="grid grid-cols-[1fr_140px_140px] border-b border-zinc-100 px-5 py-4 text-sm last:border-b-0"
                             >
-                                <span className="font-medium">{participant.name}</span>
+                                <Link
+                                    href={`/athletes/${participant.id}`}
+                                    className="font-medium hover:underline"
+                                >
+                                    {participant.name}
+                                </Link>
 
                                 <span className="text-zinc-600">
                   {participant.birth_year ?? "–"}
