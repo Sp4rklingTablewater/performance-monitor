@@ -1,12 +1,22 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { PerformanceLineChart } from "@/components/performance-line-chart";
 
 type AthletePageProps = {
     params: Promise<{
         id: string;
     }>;
 };
+
+function formatTestDate(date: string) {
+    return new Intl.DateTimeFormat("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+        timeZone: "UTC",
+    }).format(new Date(`${date}T00:00:00Z`));
+}
 
 export default async function AthletePage({
                                               params,
@@ -38,6 +48,33 @@ export default async function AthletePage({
         );
     }
 
+    const chronologicalTests = [...tests].reverse();
+
+    const jumpHeightData = chronologicalTests
+        .filter(
+            (test) =>
+                test.reach_height_cm !== null &&
+                test.jump_reach_cm !== null
+        )
+        .map((test) => ({
+            date: formatTestDate(test.test_date),
+            value: test.jump_reach_cm - test.reach_height_cm,
+        }));
+
+    const sprintData = chronologicalTests
+        .filter((test) => test.sprint_93639_seconds !== null)
+        .map((test) => ({
+            date: formatTestDate(test.test_date),
+            value: Number(test.sprint_93639_seconds),
+        }));
+
+    const ballControlData = chronologicalTests
+        .filter((test) => test.ball_control_count !== null)
+        .map((test) => ({
+            date: formatTestDate(test.test_date),
+            value: test.ball_control_count,
+        }));
+
     return (
         <>
             <header className="mb-8">
@@ -65,14 +102,57 @@ export default async function AthletePage({
                         </p>
                     </div>
 
-                    <Link
-                        href={`/athletes/${participant.id}/tests/new`}
-                        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-                    >
-                        Test hinzufügen
-                    </Link>
+                    <div className="flex gap-3">
+                        <Link
+                            href={`/athletes/${participant.id}/edit`}
+                            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-50"
+                        >
+                            Bearbeiten
+                        </Link>
+
+                        <Link
+                            href={`/athletes/${participant.id}/tests/new`}
+                            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+                        >
+                            Test hinzufügen
+                        </Link>
+                    </div>
                 </div>
             </header>
+
+            <section className="mb-10">
+                <div className="mb-4">
+                    <h2 className="text-lg font-semibold">
+                        Entwicklung
+                    </h2>
+                    <p className="mt-1 text-sm text-zinc-500">
+                        Leistungsentwicklung über alle erfassten Testzeitpunkte.
+                    </p>
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-2">
+                    <PerformanceLineChart
+                        title="Sprung absolut"
+                        unit="cm"
+                        data={jumpHeightData}
+                        betterDirection="higher"
+                    />
+
+                    <PerformanceLineChart
+                        title="9-3-6-3-9"
+                        unit="s"
+                        data={sprintData}
+                        betterDirection="lower"
+                    />
+
+                    <PerformanceLineChart
+                        title="Ballkontrolle"
+                        unit=""
+                        data={ballControlData}
+                        betterDirection="higher"
+                    />
+                </div>
+            </section>
 
             <section>
                 <h2 className="mb-4 text-lg font-semibold">

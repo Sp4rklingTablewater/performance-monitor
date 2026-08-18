@@ -7,6 +7,7 @@ export default async function AthletesPage() {
     const { data: participants, error } = await supabase
         .from("participants")
         .select("id, name, birth_year, participant_type, active")
+        .eq("active", true)
         .order("name", { ascending: true });
 
     if (error) {
