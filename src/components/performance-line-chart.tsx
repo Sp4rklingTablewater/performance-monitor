@@ -27,6 +27,23 @@ export function PerformanceLineChart({
                                          data,
                                          betterDirection,
                                      }: PerformanceLineChartProps) {
+    const values = data.map((point) => point.value);
+
+    const minValue = values.length > 0 ? Math.min(...values) : 0;
+    const maxValue = values.length > 0 ? Math.max(...values) : 0;
+
+    const range = maxValue - minValue;
+
+    const padding =
+        range > 0
+            ? range * 0.25
+            : Math.max(Math.abs(minValue) * 0.1, 1);
+
+    const domain: [number, number] = [
+        Math.max(0, minValue - padding),
+        maxValue + padding,
+    ];
+
     return (
         <div className="rounded-xl border border-zinc-200 bg-white p-5">
             <div className="mb-5">
@@ -56,7 +73,10 @@ export function PerformanceLineChart({
                         left: 0,
                     }}
                 >
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                    <CartesianGrid
+                        vertical={false}
+                        strokeDasharray="3 3"
+                    />
 
                     <XAxis
                         dataKey="date"
@@ -65,6 +85,7 @@ export function PerformanceLineChart({
                     />
 
                     <YAxis
+                        domain={domain}
                         tickLine={false}
                         axisLine={false}
                         width={45}
@@ -72,11 +93,14 @@ export function PerformanceLineChart({
                     />
 
                     <Tooltip
-                        formatter={(value) => [`${value} ${unit}`, title]}
+                        formatter={(value) => [
+                            `${value} ${unit}`,
+                            title,
+                        ]}
                     />
 
                     <Line
-                        type="monotone"
+                        type="linear"
                         dataKey="value"
                         stroke="currentColor"
                         strokeWidth={2}

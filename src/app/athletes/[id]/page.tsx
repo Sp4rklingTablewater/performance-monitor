@@ -130,7 +130,7 @@ export default async function AthletePage({
                     </p>
                 </div>
 
-                <div className="grid gap-4 lg:grid-cols-2">
+                <div className="grid gap-4 lg:grid-cols-3">
                     <PerformanceLineChart
                         title="Sprung absolut"
                         unit="cm"
