@@ -80,7 +80,7 @@ export default async function AthletePage({
                 </h2>
 
                 <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-                    <div className="grid grid-cols-7 gap-4 border-b border-zinc-200 px-5 py-3 text-sm font-medium text-zinc-500">
+                    <div className="grid grid-cols-[110px_100px_repeat(5,1fr)_80px] gap-4 border-b border-zinc-200 px-5 py-3 text-sm font-medium text-zinc-500">
                         <span>Datum</span>
                         <span>Altersklasse</span>
                         <span>Reichhöhe</span>
@@ -88,6 +88,7 @@ export default async function AthletePage({
                         <span>Sprung absolut</span>
                         <span>9-3-6-3-9</span>
                         <span>Ballkontrolle</span>
+                        <span></span>
                     </div>
 
                     {tests.length === 0 ? (
@@ -105,33 +106,44 @@ export default async function AthletePage({
                             return (
                                 <div
                                     key={test.id}
-                                    className="grid grid-cols-7 gap-4 border-b border-zinc-100 px-5 py-4 text-sm last:border-b-0"
+                                    className="grid grid-cols-[110px_100px_repeat(5,1fr)_80px] gap-4 border-b border-zinc-100 px-5 py-4 text-sm last:border-b-0"
                                 >
                                     <span>{test.test_date}</span>
+
                                     <span>{test.age_group ?? "–"}</span>
+
                                     <span>
-                    {test.reach_height_cm !== null
-                        ? `${test.reach_height_cm} cm`
-                        : "–"}
-                  </span>
+      {test.reach_height_cm !== null
+          ? `${test.reach_height_cm} cm`
+          : "–"}
+    </span>
+
                                     <span>
-    {test.jump_reach_cm !== null
-        ? `${test.jump_reach_cm} cm`
-        : "–"}
-  </span>
+      {test.jump_reach_cm !== null
+          ? `${test.jump_reach_cm} cm`
+          : "–"}
+    </span>
+
                                     <span>
-                    {jumpHeight !== null
-                        ? `${jumpHeight} cm`
-                        : "–"}
-                  </span>
+      {jumpHeight !== null
+          ? `${jumpHeight} cm`
+          : "–"}
+    </span>
+
                                     <span>
-                    {test.sprint_93639_seconds !== null
-                        ? `${test.sprint_93639_seconds} s`
-                        : "–"}
-                  </span>
-                                    <span>
-                    {test.ball_control_count ?? "–"}
-                  </span>
+      {test.sprint_93639_seconds !== null
+          ? `${test.sprint_93639_seconds} s`
+          : "–"}
+    </span>
+
+                                    <span>{test.ball_control_count ?? "–"}</span>
+
+                                    <Link
+                                        href={`/athletes/${participant.id}/tests/${test.id}/edit`}
+                                        className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
+                                    >
+                                        Ändern
+                                    </Link>
                                 </div>
                             );
                         })
