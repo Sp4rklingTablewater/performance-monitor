@@ -1,386 +1,202 @@
-"use client";
-
 import { useMemo, useState } from "react";
-
-import {
-    ComparisonChart,
-    ComparisonChartItem,
-    ComparisonMetric,
-} from "@/components/comparison-chart";
-
-type Participant = {
-    id: string;
-    name: string;
-    birth_year: number | null;
-    participant_type: "athlete" | "reference";
-    active: boolean;
-};
-
-type PerformanceTest = {
-    id: string;
-    test_date: string;
-    age_group: string | null;
-    reach_height_cm: number | null;
-    jump_reach_cm: number | null;
-    sprint_93639_seconds: number | null;
-    ball_control_count: number | null;
-    participants: Participant | Participant[];
-};
+import { ComparisonChart, type ComparisonChartItem } from "@/components/comparison-chart";
+import { ageGroupOrder, defaultAgeGroup } from "@/lib/constants";
+import { computeJumpHeight } from "@/lib/metrics";
+import type { ComparisonMetric, ComparisonTest } from "@/lib/types";
 
 type PerformanceComparisonProps = {
-    tests: PerformanceTest[];
+  tests: ComparisonTest[];
 };
 
 type MetricFilter = "all" | ComparisonMetric;
 
-const ageGroupOrder = [
-    "U13",
-    "U14",
-    "U16.2",
-    "U16.1",
-];
+function getMetricValue(test: ComparisonTest, metric: ComparisonMetric): number | null {
+  if (metric === "jump_height") {
+    return computeJumpHeight(test);
+  }
 
-function getParticipant(
-    test: PerformanceTest
-): Participant | null {
-    if (Array.isArray(test.participants)) {
-        return test.participants[0] ?? null;
-    }
+  if (metric === "sprint_93639") {
+    return test.sprint_93639_seconds === null ? null : Number(test.sprint_93639_seconds);
+  }
 
-    return test.participants;
+  return test.ball_control_count;
 }
 
-function getMetricValue(
-    test: PerformanceTest,
-    metric: ComparisonMetric
-): number | null {
-    if (metric === "jump_height") {
-        if (
-            test.reach_height_cm === null ||
-            test.jump_reach_cm === null
-        ) {
-            return null;
+export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
+  const [birthYear, setBirthYear] = useState("all");
+  const [ageGroup, setAgeGroup] = useState(defaultAgeGroup);
+  const [metric, setMetric] = useState<MetricFilter>("all");
+  const [showReferences, setShowReferences] = useState(true);
+
+  const birthYears = useMemo(() => {
+    return Array.from(
+      new Set(
+        tests
+          .filter(
+            (test) =>
+              test.participant.participant_type === "athlete" &&
+              test.participant.birth_year !== null,
+          )
+          .map((test) => test.participant.birth_year as number),
+      ),
+    ).sort((a, b) => a - b);
+  }, [tests]);
+
+  const availableAgeGroups = useMemo(() => {
+    const found = new Set(
+      tests
+        .map((test) => test.age_group)
+        .filter((value): value is string => value !== null && value !== ""),
+    );
+
+    return ageGroupOrder.filter((group) => found.has(group));
+  }, [tests]);
+
+  function getChartData(selectedMetric: ComparisonMetric): ComparisonChartItem[] {
+    return tests
+      .filter((test) => {
+        if (test.age_group !== ageGroup) {
+          return false;
         }
 
-        return (
-            test.jump_reach_cm -
-            test.reach_height_cm
-        );
-    }
+        const isReference = test.participant.participant_type === "reference";
 
-    if (metric === "sprint_93639") {
-        return test.sprint_93639_seconds === null
-            ? null
-            : Number(test.sprint_93639_seconds);
-    }
+        if (isReference) {
+          return showReferences;
+        }
 
-    return test.ball_control_count;
-}
+        if (birthYear !== "all" && test.participant.birth_year !== Number(birthYear)) {
+          return false;
+        }
 
-export function PerformanceComparison({
-                                          tests,
-                                      }: PerformanceComparisonProps) {
-    const [birthYear, setBirthYear] =
-        useState("all");
+        return true;
+      })
+      .map((test) => {
+        const value = getMetricValue(test, selectedMetric);
 
-    const [ageGroup, setAgeGroup] =
-        useState("U14");
+        if (value === null) {
+          return null;
+        }
 
-    const [metric, setMetric] =
-        useState<MetricFilter>("all");
+        const isReference = test.participant.participant_type === "reference";
+        const label = isReference
+          ? `${test.participant.name} (Ref.)`
+          : birthYear === "all"
+            ? `${test.participant.name} (${test.participant.birth_year ?? "-"})`
+            : test.participant.name;
 
-    const [
-        showReferences,
-        setShowReferences,
-    ] = useState(true);
+        return {
+          id: test.id,
+          label,
+          name: test.participant.name,
+          birthYear: test.participant.birth_year,
+          participantType: test.participant.participant_type,
+          testDate: test.test_date,
+          value,
+        };
+      })
+      .filter((item): item is ComparisonChartItem => item !== null);
+  }
 
-    const birthYears = useMemo(() => {
-        return Array.from(
-            new Set(
-                tests
-                    .map((test) =>
-                        getParticipant(test)
-                    )
-                    .filter(
-                        (
-                            participant
-                        ): participant is Participant =>
-                            participant !== null &&
-                            participant.participant_type ===
-                            "athlete" &&
-                            participant.birth_year !==
-                            null
-                    )
-                    .map(
-                        (participant) =>
-                            participant.birth_year as number
-                    )
-            )
-        ).sort((a, b) => a - b);
-    }, [tests]);
+  const jumpHeightData = getChartData("jump_height");
+  const sprintData = getChartData("sprint_93639");
+  const ballControlData = getChartData("ball_control");
 
-    const availableAgeGroups = useMemo(() => {
-        const found = new Set(
-            tests
-                .map((test) => test.age_group)
-                .filter(
-                    (
-                        value
-                    ): value is string =>
-                        value !== null &&
-                        value !== ""
-                )
-        );
+  return (
+    <div className="space-y-6">
+      <section className="rounded-xl border border-zinc-200 bg-white p-5">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium">Jahrgang</label>
+            <select
+              value={birthYear}
+              onChange={(event) => setBirthYear(event.target.value)}
+              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+            >
+              <option value="all">Alle Jahrgaenge</option>
+              {birthYears.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        return ageGroupOrder.filter((group) =>
-            found.has(group)
-        );
-    }, [tests]);
+          <div>
+            <label className="mb-1 block text-sm font-medium">Altersklasse</label>
+            <select
+              value={ageGroup}
+              onChange={(event) => setAgeGroup(event.target.value)}
+              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+            >
+              {availableAgeGroups.map((group) => (
+                <option key={group} value={group}>
+                  {group}
+                </option>
+              ))}
+            </select>
+          </div>
 
-    function getChartData(
-        selectedMetric: ComparisonMetric
-    ): ComparisonChartItem[] {
-        return tests
-            .filter((test) => {
-                const participant =
-                    getParticipant(test);
+          <div>
+            <label className="mb-1 block text-sm font-medium">Messgroesse</label>
+            <select
+              value={metric}
+              onChange={(event) => setMetric(event.target.value as MetricFilter)}
+              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+            >
+              <option value="all">Alle Messgroessen</option>
+              <option value="jump_height">Sprung absolut</option>
+              <option value="sprint_93639">9-3-6-3-9</option>
+              <option value="ball_control">Ballkontrolle</option>
+            </select>
+          </div>
 
-                if (!participant) {
-                    return false;
-                }
-
-                if (
-                    test.age_group !== ageGroup
-                ) {
-                    return false;
-                }
-
-                const isReference =
-                    participant.participant_type ===
-                    "reference";
-
-                if (isReference) {
-                    return showReferences;
-                }
-
-                if (
-                    birthYear !== "all" &&
-                    participant.birth_year !==
-                    Number(birthYear)
-                ) {
-                    return false;
-                }
-
-                return true;
-            })
-            .map((test) => {
-                const participant =
-                    getParticipant(test);
-
-                if (!participant) {
-                    return null;
-                }
-
-                const value =
-                    getMetricValue(
-                        test,
-                        selectedMetric
-                    );
-
-                if (value === null) {
-                    return null;
-                }
-
-                const isReference =
-                    participant.participant_type ===
-                    "reference";
-
-                const label = isReference
-                    ? `${participant.name} (Ref.)`
-                    : birthYear === "all"
-                        ? `${participant.name} (${
-                            participant.birth_year ??
-                            "–"
-                        })`
-                        : participant.name;
-
-                return {
-                    id: test.id,
-                    label,
-                    name: participant.name,
-                    birthYear:
-                    participant.birth_year,
-                    participantType:
-                    participant.participant_type,
-                    testDate: test.test_date,
-                    value,
-                };
-            })
-            .filter(
-                (
-                    item
-                ): item is ComparisonChartItem =>
-                    item !== null
-            );
-    }
-
-    const jumpHeightData = getChartData("jump_height");
-    const sprintData = getChartData("sprint_93639");
-    const ballControlData = getChartData("ball_control");
-
-    return (
-        <div className="space-y-6">
-            <section className="rounded-xl border border-zinc-200 bg-white p-5">
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Jahrgang
-                        </label>
-
-                        <select
-                            value={birthYear}
-                            onChange={(event) =>
-                                setBirthYear(
-                                    event.target.value
-                                )
-                            }
-                            className="w-full rounded-lg border border-zinc-300 px-3 py-2"
-                        >
-                            <option value="all">
-                                Alle Jahrgänge
-                            </option>
-
-                            {birthYears.map(
-                                (year) => (
-                                    <option
-                                        key={year}
-                                        value={year}
-                                    >
-                                        {year}
-                                    </option>
-                                )
-                            )}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Altersklasse
-                        </label>
-
-                        <select
-                            value={ageGroup}
-                            onChange={(event) =>
-                                setAgeGroup(
-                                    event.target.value
-                                )
-                            }
-                            className="w-full rounded-lg border border-zinc-300 px-3 py-2"
-                        >
-                            {availableAgeGroups.map(
-                                (group) => (
-                                    <option
-                                        key={group}
-                                        value={group}
-                                    >
-                                        {group}
-                                    </option>
-                                )
-                            )}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Messgröße
-                        </label>
-
-                        <select
-                            value={metric}
-                            onChange={(event) =>
-                                setMetric(
-                                    event.target
-                                        .value as MetricFilter
-                                )
-                            }
-                            className="w-full rounded-lg border border-zinc-300 px-3 py-2"
-                        >
-                            <option value="all">
-                                Alle Messgrößen
-                            </option>
-
-                            <option value="jump_height">
-                                Sprung absolut
-                            </option>
-
-                            <option value="sprint_93639">
-                                9-3-6-3-9
-                            </option>
-
-                            <option value="ball_control">
-                                Ballkontrolle
-                            </option>
-                        </select>
-                    </div>
-
-                    <label className="flex items-end gap-2 pb-2">
-                        <input
-                            type="checkbox"
-                            checked={
-                                showReferences
-                            }
-                            onChange={(event) =>
-                                setShowReferences(
-                                    event.target.checked
-                                )
-                            }
-                        />
-
-                        <span className="text-sm font-medium">
-                            Referenzen anzeigen
-                        </span>
-                    </label>
-                </div>
-            </section>
-
-            {metric === "all" ? (
-                <div className="grid gap-4 xl:grid-cols-3">
-                    <ComparisonChart
-                        metric="jump_height"
-                        data={jumpHeightData}
-                        birthYear={birthYear}
-                        ageGroup={ageGroup}
-                    />
-
-                    <ComparisonChart
-                        metric="sprint_93639"
-                        data={sprintData}
-                        birthYear={birthYear}
-                        ageGroup={ageGroup}
-                    />
-
-                    <ComparisonChart
-                        metric="ball_control"
-                        data={ballControlData}
-                        birthYear={birthYear}
-                        ageGroup={ageGroup}
-                    />
-                </div>
-            ) : (
-                <ComparisonChart
-                    metric={metric}
-                    data={
-                        metric === "jump_height"
-                            ? jumpHeightData
-                            : metric ===
-                            "sprint_93639"
-                                ? sprintData
-                                : ballControlData
-                    }
-                    birthYear={birthYear}
-                    ageGroup={ageGroup}
-                />
-            )}
+          <label className="flex items-end gap-2 pb-2">
+            <input
+              type="checkbox"
+              checked={showReferences}
+              onChange={(event) => setShowReferences(event.target.checked)}
+            />
+            <span className="text-sm font-medium">Referenzen anzeigen</span>
+          </label>
         </div>
-    );
+      </section>
+
+      {metric === "all" ? (
+        <div className="grid gap-4 xl:grid-cols-3">
+          <ComparisonChart
+            metric="jump_height"
+            data={jumpHeightData}
+            birthYear={birthYear}
+            ageGroup={ageGroup}
+          />
+          <ComparisonChart
+            metric="sprint_93639"
+            data={sprintData}
+            birthYear={birthYear}
+            ageGroup={ageGroup}
+          />
+          <ComparisonChart
+            metric="ball_control"
+            data={ballControlData}
+            birthYear={birthYear}
+            ageGroup={ageGroup}
+          />
+        </div>
+      ) : (
+        <ComparisonChart
+          metric={metric}
+          data={
+            metric === "jump_height"
+              ? jumpHeightData
+              : metric === "sprint_93639"
+                ? sprintData
+                : ballControlData
+          }
+          birthYear={birthYear}
+          ageGroup={ageGroup}
+        />
+      )}
+    </div>
+  );
 }
