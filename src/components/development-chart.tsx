@@ -44,7 +44,7 @@ export function DevelopmentChart({ metric, points, series, athleteCount }: Devel
           <h2 className="text-lg font-semibold">{config.label}</h2>
 
           <p className="mt-1 text-sm text-foreground/60">
-            {config.betterDirection === "higher" ? "höher ist besser" : "niedriger ist besser"}
+            {config.betterDirection === "higher" ? "Höher ist besser" : "Niedriger ist besser"}
           </p>
         </div>
 
