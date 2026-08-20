@@ -85,14 +85,14 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-zinc-200 bg-white p-5">
+      <section className="rounded-xl border border-card-border bg-card p-5">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div>
             <label className="mb-1 block text-sm font-medium">Jahrgang</label>
             <select
               value={birthYear}
               onChange={(event) => setBirthYear(event.target.value)}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className="w-full rounded-lg border border-card-border px-3 py-2"
             >
               <option value="all">Alle Jahrgänge</option>
               {birthYears.map((year) => (
@@ -108,7 +108,7 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
             <select
               value={ageGroup}
               onChange={(event) => setAgeGroup(event.target.value)}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className="w-full rounded-lg border border-card-border px-3 py-2"
             >
               {availableAgeGroups.map((group) => (
                 <option key={group} value={group}>
@@ -123,7 +123,7 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
             <select
               value={metric}
               onChange={(event) => setMetric(event.target.value as MetricFilter)}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className="w-full rounded-lg border border-card-border px-3 py-2"
             >
               <option value="all">Alle Messgrößen</option>
               <option value="reach_height">Reichhöhe im Stand</option>

@@ -50,7 +50,7 @@ export function EditAthletePage() {
   });
 
   if (participantQuery.isPending) {
-    return <p className="text-sm text-zinc-500">Lade Athlet:in...</p>;
+    return <p className="text-sm text-foreground/60">Lade Athlet:in...</p>;
   }
 
   if (!id) {
@@ -58,7 +58,7 @@ export function EditAthletePage() {
   }
 
   if (participantQuery.isError) {
-    return <p className="text-sm text-red-700">{participantQuery.error.message}</p>;
+    return <p className="text-sm text-red-400">{participantQuery.error.message}</p>;
   }
 
   const participant = participantQuery.data;
@@ -72,7 +72,7 @@ export function EditAthletePage() {
       <header className="mb-8">
         <Link
           to={`/athletes/${participant.id}`}
-          className="text-sm text-zinc-500 hover:text-zinc-900"
+          className="text-sm text-foreground/60 hover:text-foreground"
         >
           {`<- ${participant.name}`}
         </Link>
@@ -80,7 +80,7 @@ export function EditAthletePage() {
       </header>
 
       <form
-        className="max-w-xl space-y-6 rounded-xl border border-zinc-200 bg-white p-6"
+        className="max-w-xl space-y-6 rounded-xl border border-card-border bg-card p-6"
         onSubmit={(event) => {
           event.preventDefault();
           setErrorMessage(null);
@@ -97,7 +97,7 @@ export function EditAthletePage() {
             type="text"
             required
             defaultValue={participant.name}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+            className="w-full rounded-lg border border-card-border px-3 py-2"
           />
         </div>
 
@@ -112,7 +112,7 @@ export function EditAthletePage() {
             min="1900"
             max="2100"
             defaultValue={participant.birth_year ?? ""}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+            className="w-full rounded-lg border border-card-border px-3 py-2"
           />
         </div>
 
@@ -124,7 +124,7 @@ export function EditAthletePage() {
             id="participant_type"
             name="participant_type"
             defaultValue={participant.participant_type}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+            className="w-full rounded-lg border border-card-border px-3 py-2"
           >
             <option value="athlete">Athlet:in</option>
             <option value="reference">Referenz</option>
@@ -134,25 +134,25 @@ export function EditAthletePage() {
         <label className="flex items-center gap-3">
           <input name="active" type="checkbox" defaultChecked={participant.active} />
           <span className="text-sm font-medium">Aktiv</span>
-          <span className="block text-sm text-zinc-500">
+          <span className="block text-sm text-foreground/60">
             Deaktivierte Athlet:innen bleiben mit ihren Tests erhalten.
           </span>
         </label>
 
-        {errorMessage ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
+        {errorMessage ? <p className="text-sm text-red-400">{errorMessage}</p> : null}
 
         <div className="flex gap-3">
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-60"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
           >
             {mutation.isPending ? "Speichert..." : "Änderungen speichern"}
           </button>
 
           <Link
             to={`/athletes/${participant.id}`}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-50"
+            className="rounded-lg border border-card-border px-4 py-2 text-sm font-medium hover:bg-sage/20"
           >
             Abbrechen
           </Link>

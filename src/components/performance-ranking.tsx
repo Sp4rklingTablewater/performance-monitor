@@ -19,14 +19,14 @@ function rankBadgeClass(rank: number | null) {
   }
 
   if (rank === 2) {
-    return "bg-zinc-200 text-zinc-700";
+    return "bg-card-border/60 text-foreground";
   }
 
   if (rank === 3) {
     return "bg-orange-100 text-orange-800";
   }
 
-  return "bg-zinc-100 text-zinc-600";
+  return "bg-card-border/40 text-foreground/70";
 }
 
 export function PerformanceRanking({ tests }: PerformanceRankingProps) {
@@ -54,14 +54,14 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-zinc-200 bg-white p-5">
+      <section className="rounded-xl border border-card-border bg-card p-5">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div>
             <label className="mb-1 block text-sm font-medium">Testjahr</label>
             <select
               value={year}
               onChange={(event) => setYear(event.target.value)}
-              className="h-10 w-full rounded-lg border border-zinc-300 px-3"
+              className="h-10 w-full rounded-lg border border-card-border px-3"
               disabled={availableYears.length === 0}
             >
               {availableYears.length === 0 ? (
@@ -87,7 +87,7 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
             <select
               value={sortMetric}
               onChange={(event) => setSortMetric(event.target.value as ComparisonMetric)}
-              className="h-10 w-full rounded-lg border border-zinc-300 px-3"
+              className="h-10 w-full rounded-lg border border-card-border px-3"
             >
               {rankingMetrics.map((metric) => (
                 <option key={metric} value={metric}>
@@ -113,23 +113,23 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
         </div>
       </section>
 
-      <section className="rounded-xl border border-zinc-200 bg-white p-5">
+      <section className="rounded-xl border border-card-border bg-card p-5">
         <div className="mb-6 flex items-start justify-between gap-4">
           <h2 className="text-lg font-semibold">Ranking</h2>
 
           <div className="text-right">
-            <p className="text-sm text-zinc-500">Athlet:innen</p>
+            <p className="text-sm text-foreground/60">Athlet:innen</p>
             <p className="text-2xl font-semibold">{athleteCount}</p>
           </div>
         </div>
 
         {rows.length === 0 ? (
-          <div className="flex h-32 items-center justify-center text-sm text-zinc-500">
+          <div className="flex h-32 items-center justify-center text-sm text-foreground/60">
             Für diese Auswahl liegen keine Werte vor.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-zinc-200">
-            <div className="grid min-w-205 grid-cols-[56px_1fr_90px_repeat(5,112px)] gap-3 border-b border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-500">
+          <div className="overflow-x-auto rounded-lg border border-card-border">
+            <div className="grid min-w-205 grid-cols-[56px_1fr_90px_repeat(5,112px)] gap-3 border-b border-card-border bg-card px-4 py-2 text-sm font-medium text-foreground/60">
               <span>Rang</span>
               <span>Name</span>
               <span>Jahrgang</span>
@@ -143,7 +143,7 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
             {rows.map((row) => (
               <div
                 key={row.id}
-                className="grid min-w-205 grid-cols-[56px_1fr_90px_repeat(5,112px)] items-center gap-3 border-b border-zinc-100 px-4 py-3 text-sm last:border-b-0"
+                className="grid min-w-205 grid-cols-[56px_1fr_90px_repeat(5,112px)] items-center gap-3 border-b border-card-border/50 px-4 py-3 text-sm last:border-b-0"
               >
                 <span
                   className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold ${rankBadgeClass(row.rank)}`}
@@ -153,12 +153,12 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
                 <span className="font-medium">
                   {row.name}
                   {row.participantType === "reference" ? (
-                    <span className="ml-2 rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500">
+                    <span className="ml-2 rounded-full bg-card-border/40 px-2 py-0.5 text-xs font-medium text-foreground/60">
                       Ref.
                     </span>
                   ) : null}
                 </span>
-                <span className="text-zinc-600">{row.birthYear ?? "-"}</span>
+                <span className="text-foreground/70">{row.birthYear ?? "-"}</span>
                 {rankingMetrics.map((metric) => {
                   const cell = row.values[metric];
                   const unit = metricConfig[metric].unit;
@@ -166,7 +166,7 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
                   return (
                     <span key={metric} className="text-right">
                       {cell.value === null ? (
-                        <span className="text-zinc-300">-</span>
+                        <span className="text-foreground/30">-</span>
                       ) : (
                         <span
                           className={cell.isCarriedOver ? "text-amber-700" : "font-semibold"}
@@ -189,7 +189,7 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
           </div>
         )}
 
-        <p className="mt-3 text-xs text-zinc-400">
+        <p className="mt-3 text-xs text-foreground/50">
           * Wert aus einem früheren Testjahr fortgeschrieben (kein Test im gewählten Jahr
           vorhanden).
         </p>

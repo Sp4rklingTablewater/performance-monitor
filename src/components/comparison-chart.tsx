@@ -64,13 +64,39 @@ function ScatterTooltip({ active, payload, metric }: ScatterTooltipProps) {
   const config = metricConfig[metric];
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm">
+    <div className="rounded-lg border border-header bg-header px-3 py-2 text-sm text-white shadow-sm">
       <p className="font-medium">{item.label}</p>
-      <p className="text-zinc-500">
+      <p className="text-sage">
         {formatMetricValue(item.value, metric)}
         {config.unit ? ` ${config.unit}` : ""}
       </p>
     </div>
+  );
+}
+
+type ScatterDotProps = {
+  cx?: number;
+  cy?: number;
+  payload?: ComparisonChartItem;
+};
+
+/** Athlet:innen erhalten einen kräftigen Primary-Punkt, Referenzen einen zurückhaltenderen Sage-Punkt. */
+function ScatterDot({ cx, cy, payload }: ScatterDotProps) {
+  if (cx === undefined || cy === undefined) {
+    return null;
+  }
+
+  const isReference = payload?.participantType === "reference";
+
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={isReference ? 5 : 6}
+      fill={isReference ? "var(--color-sage)" : "var(--color-primary)"}
+      stroke="var(--color-header)"
+      strokeWidth={isReference ? 1 : 1.5}
+    />
   );
 }
 
@@ -99,23 +125,23 @@ export function ComparisonChart({ metric, data }: ComparisonChartProps) {
   const domain = computeChartDomain(values);
 
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-5">
+    <section className="rounded-xl border border-card-border bg-card p-5">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">{config.label}</h2>
 
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-foreground/60">
             {config.betterDirection === "higher" ? "höher ist besser" : "niedriger ist besser"}
           </p>
         </div>
 
         <div className="text-right">
-          <p className="text-sm text-zinc-500">Athlet:innen</p>
+          <p className="text-sm text-foreground/60">Athlet:innen</p>
 
           <p className="text-2xl font-semibold">{athleteValues.length}</p>
 
           {medianValue !== null && (
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-foreground/60">
               Median: {formatMetricValue(medianValue, metric)}
               {config.unit ? ` ${config.unit}` : ""}
             </p>
@@ -124,7 +150,7 @@ export function ComparisonChart({ metric, data }: ComparisonChartProps) {
       </div>
 
       {sortedData.length === 0 ? (
-        <div className="flex h-64 items-center justify-center text-sm text-zinc-500">
+        <div className="flex h-64 items-center justify-center text-sm text-foreground/60">
           Für diese Auswahl liegen keine Werte vor.
         </div>
       ) : (
@@ -139,7 +165,11 @@ export function ComparisonChart({ metric, data }: ComparisonChartProps) {
             left: 15,
           }}
         >
-          <CartesianGrid horizontal={false} strokeDasharray="3 3" />
+          <CartesianGrid
+            horizontal={false}
+            strokeDasharray="3 3"
+            stroke="var(--color-card-border)"
+          />
 
           <XAxis
             type="number"
@@ -156,9 +186,11 @@ export function ComparisonChart({ metric, data }: ComparisonChartProps) {
             content={<ScatterTooltip metric={metric} />}
           />
 
-          {medianValue !== null && <ReferenceLine x={medianValue} strokeDasharray="4 4" />}
+          {medianValue !== null && (
+            <ReferenceLine x={medianValue} stroke="var(--color-header)" strokeDasharray="4 4" />
+          )}
 
-          <Scatter data={sortedData} />
+          <Scatter data={sortedData} shape={<ScatterDot />} />
         </ScatterChart>
       )}
     </section>

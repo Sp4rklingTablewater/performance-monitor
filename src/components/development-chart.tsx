@@ -5,16 +5,16 @@ import { computeChartDomain } from "@/lib/chart-domain";
 import type { DevelopmentMetric } from "@/lib/types";
 
 const seriesColors = [
-  "#2563eb",
-  "#dc2626",
-  "#16a34a",
-  "#d97706",
-  "#7c3aed",
-  "#0891b2",
-  "#db2777",
-  "#65a30d",
-  "#4338ca",
-  "#ea580c",
+  "#4d8c79",
+  "#b5651d",
+  "#2f5d50",
+  "#c9a227",
+  "#5b7f77",
+  "#8a4b3b",
+  "#3c6e71",
+  "#a8763e",
+  "#264d43",
+  "#6b4226",
 ];
 
 type DevelopmentChartProps = {
@@ -38,25 +38,25 @@ export function DevelopmentChart({ metric, points, series, athleteCount }: Devel
   const domain = computeChartDomain(values);
 
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-5">
+    <section className="rounded-xl border border-card-border bg-card p-5">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">{config.label}</h2>
 
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-foreground/60">
             {config.betterDirection === "higher" ? "höher ist besser" : "niedriger ist besser"}
           </p>
         </div>
 
         <div className="text-right">
-          <p className="text-sm text-zinc-500">Athlet:innen</p>
+          <p className="text-sm text-foreground/60">Athlet:innen</p>
 
           <p className="text-2xl font-semibold">{athleteCount}</p>
         </div>
       </div>
 
       {series.length === 0 ? (
-        <div className="flex h-64 items-center justify-center text-sm text-zinc-500">
+        <div className="flex h-64 items-center justify-center text-sm text-foreground/60">
           Für diese Auswahl liegen keine Werte vor.
         </div>
       ) : (
@@ -72,7 +72,7 @@ export function DevelopmentChart({ metric, points, series, athleteCount }: Devel
             left: 10,
           }}
         >
-          <CartesianGrid vertical={false} strokeDasharray="3 3" />
+          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--color-card-border)" />
 
           <XAxis dataKey="ageGroup" tickLine={false} axisLine={false} />
 
@@ -90,6 +90,14 @@ export function DevelopmentChart({ metric, points, series, athleteCount }: Devel
               `${formatMetricValue(value, metric)}${config.unit ? ` ${config.unit}` : ""}`,
               name,
             ]}
+            contentStyle={{
+              backgroundColor: "var(--color-header)",
+              border: "none",
+              borderRadius: 8,
+              color: "#fff",
+            }}
+            labelStyle={{ color: "var(--color-sage)" }}
+            itemStyle={{ color: "#fff" }}
           />
 
           <Legend />

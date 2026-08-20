@@ -29,7 +29,7 @@ export function LoginPage() {
   });
 
   if (isPending) {
-    return <main className="p-6 text-sm text-zinc-500">Prüfe Anmeldung...</main>;
+    return <main className="p-6 text-sm text-foreground/60">Prüfe Anmeldung...</main>;
   }
 
   if (session) {
@@ -37,8 +37,8 @@ export function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6">
-      <div className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-6">
+    <main className="flex min-h-screen items-center justify-center bg-background px-6">
+      <div className="w-full max-w-sm rounded-xl border border-card-border bg-card p-6">
         <h1 className="text-3xl font-semibold tracking-tight">Anmelden</h1>
 
         <form
@@ -61,7 +61,7 @@ export function LoginPage() {
               name="email"
               type="email"
               required
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className="w-full rounded-lg border border-card-border px-3 py-2"
             />
           </div>
 
@@ -74,16 +74,16 @@ export function LoginPage() {
               name="password"
               type="password"
               required
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className="w-full rounded-lg border border-card-border px-3 py-2"
             />
           </div>
 
-          {errorMessage ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
+          {errorMessage ? <p className="text-sm text-red-400">{errorMessage}</p> : null}
 
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white disabled:opacity-60"
+            className="w-full rounded-lg bg-primary px-4 py-2 font-medium text-white hover:bg-primary-hover disabled:opacity-60"
           >
             {mutation.isPending ? "Anmeldung läuft..." : "Anmelden"}
           </button>

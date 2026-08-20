@@ -15,7 +15,7 @@ export function RequireAuth() {
   });
 
   if (isPending) {
-    return <div className="p-6 text-sm text-zinc-500">Prüfe Anmeldung...</div>;
+    return <div className="p-6 text-sm text-foreground/60">Prüfe Anmeldung...</div>;
   }
 
   if (isError || !session) {

@@ -1,12 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --font-sans: "Geist", Arial, Helvetica, sans-serif;
+  --background: #0b0a08;
+  --foreground: #f2ede0;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono:
-    "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
+
+  --header: #000000;
+  --primary: #d1a954;
+  --primary-hover: #b8903f;
+  --sage: #9a8a68;
+  --card: #17140f;
+  --card-border: #2e2a1e;
 }
 
 @theme inline {
@@ -14,13 +21,13 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-header: var(--header);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-sage: var(--sage);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
 }
 
 body {

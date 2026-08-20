@@ -1,12 +1,22 @@
 import type { ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "@/lib/auth";
 import { queryKeys } from "@/lib/data";
 
 type AppShellProps = {
   children: ReactNode;
 };
+
+function navLinkClass({ isActive }: { isActive: boolean }) {
+  return isActive ? "bg-primary text-white" : "text-sage hover:bg-white/10 hover:text-white";
+}
+
+function sidebarLinkClass({ isActive }: { isActive: boolean }) {
+  return isActive
+    ? "bg-primary/15 text-primary font-medium"
+    : "text-foreground/70 hover:bg-white/5 hover:text-foreground";
+}
 
 export function AppShell({ children }: AppShellProps) {
   const queryClient = useQueryClient();
@@ -21,41 +31,58 @@ export function AppShell({ children }: AppShellProps) {
   });
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <header className="border-b border-zinc-200 bg-white">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="bg-header text-white">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <span className="text-lg font-semibold">Performance Monitor</span>
           <button
             type="button"
             onClick={() => logoutMutation.mutate()}
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-50"
+            className="rounded-lg border border-white/20 px-3 py-1.5 text-sm text-white hover:bg-white/10"
           >
             Logout
           </button>
         </div>
 
         <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-6 pb-3 md:hidden">
-          <Link
+          <NavLink
             to="/athletes"
-            className="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-zinc-100"
+            className={({ isActive }) =>
+              `shrink-0 rounded-lg px-3 py-1.5 text-sm ${navLinkClass({ isActive })}`
+            }
           >
             Athlet:innen
-          </Link>
-          <Link to="/compare" className="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-zinc-100">
+          </NavLink>
+          <NavLink
+            to="/compare"
+            className={({ isActive }) =>
+              `shrink-0 rounded-lg px-3 py-1.5 text-sm ${navLinkClass({ isActive })}`
+            }
+          >
             Vergleich
-          </Link>
+          </NavLink>
         </nav>
       </header>
 
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl">
-        <aside className="hidden w-56 shrink-0 border-r border-zinc-200 px-4 py-8 md:block">
+        <aside className="hidden w-56 shrink-0 border-r border-sage/40 px-4 py-8 md:block">
           <nav className="space-y-1">
-            <Link to="/athletes" className="block rounded-lg px-3 py-2 text-sm hover:bg-zinc-100">
+            <NavLink
+              to="/athletes"
+              className={({ isActive }) =>
+                `block rounded-lg px-3 py-2 text-sm ${sidebarLinkClass({ isActive })}`
+              }
+            >
               Athlet:innen
-            </Link>
-            <Link to="/compare" className="block rounded-lg px-3 py-2 text-sm hover:bg-zinc-100">
+            </NavLink>
+            <NavLink
+              to="/compare"
+              className={({ isActive }) =>
+                `block rounded-lg px-3 py-2 text-sm ${sidebarLinkClass({ isActive })}`
+              }
+            >
               Vergleich
-            </Link>
+            </NavLink>
           </nav>
         </aside>
 

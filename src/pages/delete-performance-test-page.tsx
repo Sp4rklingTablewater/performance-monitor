@@ -47,7 +47,7 @@ export function DeletePerformanceTestPage() {
   });
 
   if (participantQuery.isPending || testQuery.isPending) {
-    return <p className="text-sm text-zinc-500">Lade Leistungstest...</p>;
+    return <p className="text-sm text-foreground/60">Lade Leistungstest...</p>;
   }
 
   if (!id || !testId) {
@@ -55,11 +55,11 @@ export function DeletePerformanceTestPage() {
   }
 
   if (participantQuery.isError) {
-    return <p className="text-sm text-red-700">{participantQuery.error.message}</p>;
+    return <p className="text-sm text-red-400">{participantQuery.error.message}</p>;
   }
 
   if (testQuery.isError) {
-    return <p className="text-sm text-red-700">{testQuery.error.message}</p>;
+    return <p className="text-sm text-red-400">{testQuery.error.message}</p>;
   }
 
   const participant = participantQuery.data;
@@ -74,7 +74,7 @@ export function DeletePerformanceTestPage() {
       <header className="mb-8">
         <Link
           to={`/athletes/${participant.id}/tests/${test.id}/edit`}
-          className="text-sm text-zinc-500 hover:text-zinc-900"
+          className="text-sm text-foreground/60 hover:text-foreground"
         >
           {"<- Zurück"}
         </Link>
@@ -82,10 +82,10 @@ export function DeletePerformanceTestPage() {
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">Leistungstest löschen</h1>
       </header>
 
-      <div className="max-w-xl rounded-xl border border-red-200 bg-white p-6">
+      <div className="max-w-xl rounded-xl border border-red-900/40 bg-card p-6">
         <p className="font-medium">Möchtest du diesen Leistungstest wirklich löschen?</p>
 
-        <div className="mt-4 text-sm text-zinc-600">
+        <div className="mt-4 text-sm text-foreground/70">
           <p>{participant.name}</p>
           <p>
             {test.test_date}
@@ -93,8 +93,8 @@ export function DeletePerformanceTestPage() {
           </p>
         </div>
 
-        <p className="mt-4 text-sm text-red-700">Der Leistungstest wird dauerhaft gelöscht.</p>
-        {errorMessage ? <p className="mt-3 text-sm text-red-700">{errorMessage}</p> : null}
+        <p className="mt-4 text-sm text-red-400">Der Leistungstest wird dauerhaft gelöscht.</p>
+        {errorMessage ? <p className="mt-3 text-sm text-red-400">{errorMessage}</p> : null}
 
         <div className="mt-6 flex gap-3">
           <button
@@ -108,7 +108,7 @@ export function DeletePerformanceTestPage() {
 
           <Link
             to={`/athletes/${participant.id}/tests/${test.id}/edit`}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-50"
+            className="rounded-lg border border-card-border px-4 py-2 text-sm font-medium hover:bg-sage/20"
           >
             Abbrechen
           </Link>

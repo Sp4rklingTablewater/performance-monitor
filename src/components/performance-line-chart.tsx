@@ -30,17 +30,17 @@ export function PerformanceLineChart({
   const domain = computeChartDomain(values, 0.25);
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+    <div className="rounded-xl border border-card-border bg-card p-5">
       <div className="mb-5">
         <h3 className="font-semibold">{title}</h3>
 
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-foreground/60">
           {betterDirection === "higher" ? "Höher ist besser" : "Niedriger ist besser"}
         </p>
       </div>
 
       {cleanData.length < 2 ? (
-        <div className="flex h-64 items-center justify-center text-sm text-zinc-500">
+        <div className="flex h-64 items-center justify-center text-sm text-foreground/60">
           Mindestens zwei Messungen für eine Entwicklung erforderlich.
         </div>
       ) : (
@@ -56,7 +56,7 @@ export function PerformanceLineChart({
             left: 10,
           }}
         >
-          <CartesianGrid vertical={false} strokeDasharray="3 3" />
+          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--color-card-border)" />
 
           <XAxis dataKey="date" tickLine={false} axisLine={false} />
 
@@ -69,15 +69,25 @@ export function PerformanceLineChart({
             tickFormatter={(value) => Number(value).toFixed(decimals)}
           />
 
-          <Tooltip formatter={(value) => [`${Number(value).toFixed(decimals)} ${unit}`, title]} />
+          <Tooltip
+            formatter={(value) => [`${Number(value).toFixed(decimals)} ${unit}`, title]}
+            contentStyle={{
+              backgroundColor: "var(--color-header)",
+              border: "none",
+              borderRadius: 8,
+              color: "#fff",
+            }}
+            labelStyle={{ color: "var(--color-sage)" }}
+            itemStyle={{ color: "#fff" }}
+          />
 
           <Line
             type="linear"
             dataKey="value"
-            stroke="currentColor"
+            stroke="var(--color-primary)"
             strokeWidth={2}
-            dot={{ r: 4 }}
-            activeDot={{ r: 6 }}
+            dot={{ r: 4, fill: "var(--color-primary)" }}
+            activeDot={{ r: 6, fill: "var(--color-header)" }}
           />
         </LineChart>
       )}

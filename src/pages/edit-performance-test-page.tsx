@@ -53,7 +53,7 @@ export function EditPerformanceTestPage() {
   });
 
   if (participantQuery.isPending || testQuery.isPending) {
-    return <p className="text-sm text-zinc-500">Lade Leistungstest...</p>;
+    return <p className="text-sm text-foreground/60">Lade Leistungstest...</p>;
   }
 
   if (!id || !testId) {
@@ -61,11 +61,11 @@ export function EditPerformanceTestPage() {
   }
 
   if (participantQuery.isError) {
-    return <p className="text-sm text-red-700">{participantQuery.error.message}</p>;
+    return <p className="text-sm text-red-400">{participantQuery.error.message}</p>;
   }
 
   if (testQuery.isError) {
-    return <p className="text-sm text-red-700">{testQuery.error.message}</p>;
+    return <p className="text-sm text-red-400">{testQuery.error.message}</p>;
   }
 
   const participant = participantQuery.data;
@@ -80,7 +80,7 @@ export function EditPerformanceTestPage() {
       <header className="mb-8">
         <Link
           to={`/athletes/${participant.id}`}
-          className="text-sm text-zinc-500 hover:text-zinc-900"
+          className="text-sm text-foreground/60 hover:text-foreground"
         >
           {`<- ${participant.name}`}
         </Link>
@@ -89,7 +89,7 @@ export function EditPerformanceTestPage() {
       </header>
 
       <form
-        className="max-w-2xl space-y-6 rounded-xl border border-zinc-200 bg-white p-6"
+        className="max-w-2xl space-y-6 rounded-xl border border-card-border bg-card p-6"
         onSubmit={(event) => {
           event.preventDefault();
           setErrorMessage(null);
@@ -98,27 +98,27 @@ export function EditPerformanceTestPage() {
       >
         <PerformanceTestFields defaultValues={test} />
 
-        {errorMessage ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
+        {errorMessage ? <p className="text-sm text-red-400">{errorMessage}</p> : null}
 
         <div className="flex gap-3">
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-60"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
           >
             {mutation.isPending ? "Speichert..." : "Änderungen speichern"}
           </button>
 
           <Link
             to={`/athletes/${participant.id}`}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-50"
+            className="rounded-lg border border-card-border px-4 py-2 text-sm font-medium hover:bg-sage/20"
           >
             Abbrechen
           </Link>
 
           <Link
             to={`/athletes/${participant.id}/tests/${test.id}/delete`}
-            className="ml-auto rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
+            className="ml-auto rounded-lg border border-red-800/50 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-950/40"
           >
             Test löschen
           </Link>

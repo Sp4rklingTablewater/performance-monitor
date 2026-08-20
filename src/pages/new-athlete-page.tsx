@@ -34,7 +34,7 @@ export function NewAthletePage() {
       </header>
 
       <form
-        className="max-w-xl space-y-6 rounded-xl border border-zinc-200 bg-white p-6"
+        className="max-w-xl space-y-6 rounded-xl border border-card-border bg-card p-6"
         onSubmit={(event) => {
           event.preventDefault();
           setErrorMessage(null);
@@ -50,7 +50,7 @@ export function NewAthletePage() {
             name="name"
             type="text"
             required
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+            className="w-full rounded-lg border border-card-border px-3 py-2"
           />
         </div>
 
@@ -64,7 +64,7 @@ export function NewAthletePage() {
             type="number"
             min="1900"
             max="2100"
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+            className="w-full rounded-lg border border-card-border px-3 py-2"
           />
         </div>
 
@@ -76,19 +76,19 @@ export function NewAthletePage() {
             id="participant_type"
             name="participant_type"
             defaultValue="athlete"
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+            className="w-full rounded-lg border border-card-border px-3 py-2"
           >
             <option value="athlete">Athlet:in</option>
             <option value="reference">Referenz</option>
           </select>
         </div>
 
-        {errorMessage ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
+        {errorMessage ? <p className="text-sm text-red-400">{errorMessage}</p> : null}
 
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-60"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
         >
           {mutation.isPending ? "Speichert..." : "Speichern"}
         </button>

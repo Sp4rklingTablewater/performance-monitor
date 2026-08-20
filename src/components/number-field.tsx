@@ -18,8 +18,8 @@ export function NumberField({ id, label, min, step, unit, defaultValue }: Number
       defaultValue={defaultValue ?? ""}
       className={
         unit
-          ? "w-full rounded-l-lg border border-zinc-300 px-3 py-2"
-          : "w-full rounded-lg border border-zinc-300 px-3 py-2"
+          ? "w-full rounded-l-lg border border-card-border px-3 py-2"
+          : "w-full rounded-lg border border-card-border px-3 py-2"
       }
     />
   );
@@ -33,7 +33,7 @@ export function NumberField({ id, label, min, step, unit, defaultValue }: Number
       {unit ? (
         <div className="flex">
           {input}
-          <span className="flex items-center rounded-r-lg border border-l-0 border-zinc-300 bg-zinc-50 px-3 text-sm text-zinc-500">
+          <span className="flex items-center rounded-r-lg border border-l-0 border-card-border bg-card px-3 text-sm text-foreground/60">
             {unit}
           </span>
         </div>

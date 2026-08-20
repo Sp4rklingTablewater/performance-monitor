@@ -26,14 +26,16 @@ export function ComparePage() {
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight">{modeLabels[mode]}</h1>
 
-        <div className="mt-4 inline-flex rounded-lg border border-zinc-300 bg-white p-1">
+        <div className="mt-4 inline-flex rounded-lg border border-card-border bg-card p-1">
           {(Object.keys(modeLabels) as CompareMode[]).map((option) => (
             <button
               key={option}
               type="button"
               onClick={() => setMode(option)}
               className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                mode === option ? "bg-zinc-900 text-white" : "text-zinc-600 hover:bg-zinc-100"
+                mode === option
+                  ? "bg-primary text-white"
+                  : "text-foreground/70 hover:bg-card-border/40"
               }`}
             >
               {modeLabels[option]}
@@ -42,8 +44,8 @@ export function ComparePage() {
         </div>
       </header>
 
-      {isPending ? <p className="text-sm text-zinc-500">Lade Vergleichsdaten...</p> : null}
-      {isError ? <p className="text-sm text-red-700">{error.message}</p> : null}
+      {isPending ? <p className="text-sm text-foreground/60">Lade Vergleichsdaten...</p> : null}
+      {isError ? <p className="text-sm text-red-400">{error.message}</p> : null}
       {data ? (
         mode === "comparison" ? (
           <PerformanceComparison tests={data} />
@@ -56,4 +58,3 @@ export function ComparePage() {
     </>
   );
 }
-

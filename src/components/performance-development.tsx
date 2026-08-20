@@ -31,7 +31,7 @@ export function PerformanceDevelopment({ tests }: PerformanceDevelopmentProps) {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-zinc-200 bg-white p-5">
+      <section className="rounded-xl border border-card-border bg-card p-5">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <BirthYearMultiSelect
             availableYears={availableBirthYears}
@@ -44,7 +44,7 @@ export function PerformanceDevelopment({ tests }: PerformanceDevelopmentProps) {
             <select
               value={metric}
               onChange={(event) => setMetric(event.target.value as DevelopmentMetric)}
-              className="h-10 w-full rounded-lg border border-zinc-300 px-3"
+              className="h-10 w-full rounded-lg border border-card-border px-3"
             >
               {developmentMetricOptions.map((option) => (
                 <option key={option.value} value={option.value}>

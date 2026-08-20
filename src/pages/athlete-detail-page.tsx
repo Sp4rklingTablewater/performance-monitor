@@ -64,7 +64,7 @@ export function AthleteDetailPage() {
     }));
 
   if (participantQuery.isPending || testsQuery.isPending) {
-    return <p className="text-sm text-zinc-500">Lade Athlet:in...</p>;
+    return <p className="text-sm text-foreground/60">Lade Athlet:in...</p>;
   }
 
   if (!id) {
@@ -72,11 +72,11 @@ export function AthleteDetailPage() {
   }
 
   if (participantQuery.isError) {
-    return <p className="text-sm text-red-700">{participantQuery.error.message}</p>;
+    return <p className="text-sm text-red-400">{participantQuery.error.message}</p>;
   }
 
   if (testsQuery.isError) {
-    return <p className="text-sm text-red-700">{testsQuery.error.message}</p>;
+    return <p className="text-sm text-red-400">{testsQuery.error.message}</p>;
   }
 
   const participant = participantQuery.data;
@@ -90,14 +90,14 @@ export function AthleteDetailPage() {
   return (
     <>
       <header className="mb-8">
-        <Link to="/athletes" className="text-sm text-zinc-500 hover:text-zinc-900">
+        <Link to="/athletes" className="text-sm text-foreground/60 hover:text-foreground">
           {"<- Athlet:innen"}
         </Link>
 
         <div className="mt-4 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight">{participant.name}</h1>
-            <p className="mt-2 text-sm text-zinc-500">
+            <p className="mt-2 text-sm text-foreground/60">
               {participant.birth_year ? `Jahrgang ${participant.birth_year}` : "Kein Jahrgang"} ·{" "}
               {participant.participant_type === "reference" ? "Referenz" : "Athlet:in"}
             </p>
@@ -106,14 +106,14 @@ export function AthleteDetailPage() {
           <div className="flex gap-3">
             <Link
               to={`/athletes/${participant.id}/edit`}
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-50"
+              className="rounded-lg border border-card-border px-4 py-2 text-sm font-medium hover:bg-sage/20"
             >
               Bearbeiten
             </Link>
 
             <Link
               to={`/athletes/${participant.id}/tests/new`}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
             >
               Test hinzufügen
             </Link>
@@ -166,8 +166,8 @@ export function AthleteDetailPage() {
       <section>
         <h2 className="mb-4 text-lg font-semibold">Leistungstests</h2>
 
-        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-          <div className="grid grid-cols-[110px_100px_repeat(5,1fr)_80px] gap-4 border-b border-zinc-200 px-5 py-3 text-sm font-medium text-zinc-500">
+        <div className="overflow-hidden rounded-xl border border-card-border bg-card">
+          <div className="grid grid-cols-[110px_100px_repeat(5,1fr)_80px] gap-4 border-b border-card-border px-5 py-3 text-sm font-medium text-foreground/60">
             <span>Datum</span>
             <span>Altersklasse</span>
             <span>Reichhöhe im Stand</span>
@@ -179,7 +179,7 @@ export function AthleteDetailPage() {
           </div>
 
           {tests.length === 0 ? (
-            <div className="px-5 py-10 text-center text-sm text-zinc-500">
+            <div className="px-5 py-10 text-center text-sm text-foreground/60">
               Noch keine Leistungstests vorhanden.
             </div>
           ) : (
@@ -187,7 +187,7 @@ export function AthleteDetailPage() {
               return (
                 <div
                   key={test.id}
-                  className="grid grid-cols-[110px_100px_repeat(5,1fr)_80px] gap-4 border-b border-zinc-100 px-5 py-4 text-sm last:border-b-0"
+                  className="grid grid-cols-[110px_100px_repeat(5,1fr)_80px] gap-4 border-b border-card-border/50 px-5 py-4 text-sm last:border-b-0"
                 >
                   <span>{formatTestDate(test.test_date)}</span>
                   <span>{test.age_group ?? "-"}</span>
@@ -200,7 +200,7 @@ export function AthleteDetailPage() {
                   <span>{test.ball_control_count ?? "-"}</span>
                   <Link
                     to={`/athletes/${participant.id}/tests/${test.id}/edit`}
-                    className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
+                    className="text-sm font-medium text-foreground/70 hover:text-foreground"
                   >
                     Ändern
                   </Link>
