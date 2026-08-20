@@ -179,7 +179,14 @@ export function ComparisonChart({ metric, data }: ComparisonChartProps) {
             tickFormatter={(value) => formatMetricValue(value, metric)}
           />
 
-          <YAxis type="category" dataKey="label" width={135} tickLine={false} axisLine={false} />
+          <YAxis
+            type="category"
+            dataKey="label"
+            width={135}
+            tickLine={false}
+            axisLine={false}
+            reversed
+          />
 
           <Tooltip
             cursor={{ strokeDasharray: "3 3" }}
