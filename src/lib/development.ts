@@ -27,7 +27,8 @@ type BuildDevelopmentDataOptions = {
 
 /**
  * Baut die Datenstruktur für den Entwicklungsvergleich auf: eine Linie pro Athlet:in
- * über die sportliche Entwicklungsreihenfolge U13 → U14 → U16.2 → U16.1.
+ * über die sportliche Entwicklungsreihenfolge
+ * U12.3 → U12.2 → U12.1 → U13 → U14 → U16.2 → U16.1.
  * Fehlende Tests werden nicht künstlich aufgefüllt.
  */
 export function buildDevelopmentData(
