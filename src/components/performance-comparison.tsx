@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { ComparisonChart, type ComparisonChartItem } from "@/components/comparison-chart";
 import { ageGroupOrder, defaultAgeGroup } from "@/lib/constants";
-import { getComparisonMetricValue } from "@/lib/metrics";
+import { buildParticipantLabel, getComparisonMetricValue, metricConfig } from "@/lib/metrics";
+import { getAvailableBirthYears } from "@/lib/ranking";
 import type { ComparisonMetric, ComparisonTest } from "@/lib/types";
 
 type PerformanceComparisonProps = {
@@ -10,25 +11,15 @@ type PerformanceComparisonProps = {
 
 type MetricFilter = "all" | ComparisonMetric;
 
+const comparisonMetrics = Object.keys(metricConfig) as ComparisonMetric[];
+
 export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
   const [birthYear, setBirthYear] = useState("all");
   const [ageGroup, setAgeGroup] = useState(defaultAgeGroup);
   const [metric, setMetric] = useState<MetricFilter>("all");
   const [showReferences, setShowReferences] = useState(true);
 
-  const birthYears = useMemo(() => {
-    return Array.from(
-      new Set(
-        tests
-          .filter(
-            (test) =>
-              test.participant.participant_type === "athlete" &&
-              test.participant.birth_year !== null,
-          )
-          .map((test) => test.participant.birth_year as number),
-      ),
-    ).sort((a, b) => a - b);
-  }, [tests]);
+  const birthYears = useMemo(() => getAvailableBirthYears(tests), [tests]);
 
   const availableAgeGroups = useMemo(() => {
     const found = new Set(
@@ -66,12 +57,9 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
           return null;
         }
 
-        const isReference = test.participant.participant_type === "reference";
-        const label = isReference
-          ? `${test.participant.name} (Ref.)`
-          : birthYear === "all"
-            ? `${test.participant.name} (${test.participant.birth_year ?? "-"})`
-            : test.participant.name;
+        const label = buildParticipantLabel(test.participant, {
+          showBirthYear: birthYear === "all",
+        });
 
         return {
           id: test.id,
@@ -86,11 +74,14 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
       .filter((item): item is ComparisonChartItem => item !== null);
   }
 
-  const reachHeightData = getChartData("reach_height");
-  const jumpReachData = getChartData("jump_reach");
-  const jumpHeightData = getChartData("jump_height");
-  const sprintData = getChartData("sprint_93639");
-  const ballControlData = getChartData("ball_control");
+  const dataByMetric = useMemo(
+    () =>
+      Object.fromEntries(
+        comparisonMetrics.map((metricKey) => [metricKey, getChartData(metricKey)]),
+      ) as Record<ComparisonMetric, ComparisonChartItem[]>,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [tests, ageGroup, birthYear, showReferences],
+  );
 
   return (
     <div className="space-y-6">
@@ -156,27 +147,12 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
 
       {metric === "all" ? (
         <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
-          <ComparisonChart metric="reach_height" data={reachHeightData} />
-          <ComparisonChart metric="jump_reach" data={jumpReachData} />
-          <ComparisonChart metric="jump_height" data={jumpHeightData} />
-          <ComparisonChart metric="sprint_93639" data={sprintData} />
-          <ComparisonChart metric="ball_control" data={ballControlData} />
+          {comparisonMetrics.map((metricKey) => (
+            <ComparisonChart key={metricKey} metric={metricKey} data={dataByMetric[metricKey]} />
+          ))}
         </div>
       ) : (
-        <ComparisonChart
-          metric={metric}
-          data={
-            metric === "reach_height"
-              ? reachHeightData
-              : metric === "jump_reach"
-                ? jumpReachData
-                : metric === "jump_height"
-                  ? jumpHeightData
-                  : metric === "sprint_93639"
-                    ? sprintData
-                    : ballControlData
-          }
-        />
+        <ComparisonChart metric={metric} data={dataByMetric[metric]} />
       )}
     </div>
   );

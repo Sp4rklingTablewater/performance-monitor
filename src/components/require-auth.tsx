@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { getSession } from "@/lib/auth";
+import { queryKeys } from "@/lib/data";
 
 export function RequireAuth() {
   const location = useLocation();
@@ -9,7 +10,7 @@ export function RequireAuth() {
     isPending,
     isError,
   } = useQuery({
-    queryKey: ["auth", "session"],
+    queryKey: queryKeys.authSession,
     queryFn: getSession,
   });
 

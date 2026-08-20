@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
+import type { PerformanceTestFormValues } from "@/lib/forms";
 
 export async function createParticipant(input: {
   name: string;
@@ -69,14 +70,7 @@ export async function createPerformanceTest(
 export async function updatePerformanceTest(
   participantId: string,
   testId: string,
-  input: {
-    testDate: string;
-    ageGroup: string | null;
-    reachHeight: number | null;
-    jumpReach: number | null;
-    sprint: number | null;
-    ballControl: number | null;
-  },
+  input: PerformanceTestFormValues,
 ) {
   const { error } = await supabase
     .from("performance_tests")

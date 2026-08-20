@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { ComparisonTest, Participant, PerformanceTest } from "@/lib/types";
 
 export const queryKeys = {
+  authSession: ["auth", "session"] as const,
   dashboard: ["dashboard"] as const,
   participants: ["participants"] as const,
   participant: (id: string) => ["participants", id] as const,

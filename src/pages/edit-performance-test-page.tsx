@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AgeGroupSelect } from "@/components/age-group-select";
-import { NumberField } from "@/components/number-field";
+import { PerformanceTestFields } from "@/components/performance-test-fields";
 import { fetchParticipantById, fetchPerformanceTest, queryKeys } from "@/lib/data";
-import { parseNullableNumber, parseOptionalString, requireString } from "@/lib/forms";
+import { parsePerformanceTestForm } from "@/lib/forms";
 import { updatePerformanceTest } from "@/lib/mutations";
 import { NotFoundPage } from "@/pages/not-found-page";
 
@@ -28,25 +27,13 @@ export function EditPerformanceTestPage() {
 
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const testDate = requireString(formData.get("test_date"), "Testdatum");
-      const ageGroup = parseOptionalString(formData.get("age_group"));
-      const reachHeight = parseNullableNumber(formData.get("reach_height_cm"));
-      const jumpReach = parseNullableNumber(formData.get("jump_reach_cm"));
-      const sprint = parseNullableNumber(formData.get("sprint_93639_seconds"));
-      const ballControl = parseNullableNumber(formData.get("ball_control_count"));
+      const values = parsePerformanceTestForm(formData);
 
       if (!id || !testId) {
         throw new Error("Fehlende IDs.");
       }
 
-      await updatePerformanceTest(id, testId, {
-        testDate,
-        ageGroup,
-        reachHeight,
-        jumpReach,
-        sprint,
-        ballControl,
-      });
+      await updatePerformanceTest(id, testId, values);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -109,57 +96,7 @@ export function EditPerformanceTestPage() {
           mutation.mutate(new FormData(event.currentTarget));
         }}
       >
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div>
-            <label htmlFor="test_date" className="mb-1 block text-sm font-medium">
-              Testdatum
-            </label>
-            <input
-              id="test_date"
-              name="test_date"
-              type="date"
-              required
-              defaultValue={test.test_date}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
-            />
-          </div>
-
-          <AgeGroupSelect defaultValue={test.age_group ?? ""} />
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-2">
-          <NumberField
-            id="reach_height_cm"
-            label="Reichhöhe"
-            defaultValue={test.reach_height_cm}
-            step="1"
-            min="1"
-          />
-          <NumberField
-            id="jump_reach_cm"
-            label="Sprunghöhe"
-            defaultValue={test.jump_reach_cm}
-            step="1"
-            min="1"
-          />
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-2">
-          <NumberField
-            id="sprint_93639_seconds"
-            label="9-3-6-3-9"
-            defaultValue={test.sprint_93639_seconds}
-            step="0.01"
-            min="0"
-          />
-          <NumberField
-            id="ball_control_count"
-            label="Ballkontrolle"
-            defaultValue={test.ball_control_count}
-            step="1"
-            min="0"
-          />
-        </div>
+        <PerformanceTestFields defaultValues={test} />
 
         {errorMessage ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
 

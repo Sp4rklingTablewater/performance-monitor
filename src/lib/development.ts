@@ -1,5 +1,5 @@
 import { ageGroupOrder } from "@/lib/constants";
-import { getComparisonMetricValue } from "@/lib/metrics";
+import { buildParticipantLabel, getComparisonMetricValue } from "@/lib/metrics";
 import type { ComparisonTest, DevelopmentMetric } from "@/lib/types";
 
 /** Ein Datenpunkt pro Altersklasse. `ageGroup` ist die X-Achsen-Kategorie,
@@ -71,11 +71,7 @@ export function buildDevelopmentData(
       continue;
     }
 
-    const label = isReference
-      ? `${participant.name} (Ref.)`
-      : showBirthYearInLabel
-        ? `${participant.name} (${participant.birth_year ?? "-"})`
-        : participant.name;
+    const label = buildParticipantLabel(participant, { showBirthYear: showBirthYearInLabel });
 
     let entry = participantEntries.get(participant.id);
 
@@ -111,5 +107,3 @@ export function buildDevelopmentData(
 
   return { points, series, athleteCount };
 }
-
-

@@ -1,6 +1,7 @@
 import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import type { DevelopmentPoint, DevelopmentSeries } from "@/lib/development";
 import { formatMetricValue, metricConfig } from "@/lib/metrics";
+import { computeChartDomain } from "@/lib/chart-domain";
 import type { DevelopmentMetric } from "@/lib/types";
 
 const seriesColors = [
@@ -23,12 +24,7 @@ type DevelopmentChartProps = {
   athleteCount: number;
 };
 
-export function DevelopmentChart({
-  metric,
-  points,
-  series,
-  athleteCount,
-}: DevelopmentChartProps) {
+export function DevelopmentChart({ metric, points, series, athleteCount }: DevelopmentChartProps) {
   const config = metricConfig[metric];
 
   const values = points.flatMap((point) =>
@@ -39,14 +35,7 @@ export function DevelopmentChart({
       .filter((value): value is number => Number.isFinite(value)),
   );
 
-  const minValue = values.length > 0 ? Math.min(...values) : 0;
-  const maxValue = values.length > 0 ? Math.max(...values) : 0;
-
-  const range = maxValue - minValue;
-
-  const padding = range > 0 ? range * 0.2 : Math.max(Math.abs(minValue) * 0.1, 1);
-
-  const domain: [number, number] = [Math.max(0, minValue - padding), maxValue + padding];
+  const domain = computeChartDomain(values);
 
   return (
     <section className="rounded-xl border border-zinc-200 bg-white p-5">
@@ -124,11 +113,3 @@ export function DevelopmentChart({
     </section>
   );
 }
-
-
-
-
-
-
-
-

@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AgeGroupSelect } from "@/components/age-group-select";
-import { NumberField } from "@/components/number-field";
+import { PerformanceTestFields } from "@/components/performance-test-fields";
 import { fetchParticipantById, queryKeys } from "@/lib/data";
-import { parseNullableNumber, parseOptionalString, requireString } from "@/lib/forms";
+import { parsePerformanceTestForm } from "@/lib/forms";
 import { createPerformanceTest } from "@/lib/mutations";
 import { NotFoundPage } from "@/pages/not-found-page";
 
@@ -22,25 +21,13 @@ export function NewPerformanceTestPage() {
 
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const testDate = requireString(formData.get("test_date"), "Testdatum");
-      const ageGroup = parseOptionalString(formData.get("age_group"));
-      const reachHeight = parseNullableNumber(formData.get("reach_height_cm"));
-      const jumpReach = parseNullableNumber(formData.get("jump_reach_cm"));
-      const sprint = parseNullableNumber(formData.get("sprint_93639_seconds"));
-      const ballControl = parseNullableNumber(formData.get("ball_control_count"));
+      const values = parsePerformanceTestForm(formData);
 
       if (!id) {
         throw new Error("Fehlende ID.");
       }
 
-      await createPerformanceTest(id, {
-        testDate,
-        ageGroup,
-        reachHeight,
-        jumpReach,
-        sprint,
-        ballControl,
-      });
+      await createPerformanceTest(id, values);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -99,7 +86,7 @@ export function NewPerformanceTestPage() {
           mutation.mutate(new FormData(event.currentTarget));
         }}
       >
-        <TestFields />
+        <PerformanceTestFields />
 
         {errorMessage ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
 
@@ -120,39 +107,6 @@ export function NewPerformanceTestPage() {
           </Link>
         </div>
       </form>
-    </>
-  );
-}
-
-function TestFields() {
-  return (
-    <>
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div>
-          <label htmlFor="test_date" className="mb-1 block text-sm font-medium">
-            Testdatum
-          </label>
-          <input
-            id="test_date"
-            name="test_date"
-            type="date"
-            required
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2"
-          />
-        </div>
-
-        <AgeGroupSelect />
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-2">
-        <NumberField id="reach_height_cm" label="Reichhöhe" unit="cm" min="1" step="1" />
-        <NumberField id="jump_reach_cm" label="Sprunghöhe" unit="cm" min="1" step="1" />
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-2">
-        <NumberField id="sprint_93639_seconds" label="9-3-6-3-9" unit="s" min="0" step="0.01" />
-        <NumberField id="ball_control_count" label="Ballkontrolle" min="0" step="1" />
-      </div>
     </>
   );
 }

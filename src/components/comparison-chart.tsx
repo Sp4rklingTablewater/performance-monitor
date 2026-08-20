@@ -8,6 +8,7 @@ import {
   YAxis,
 } from "recharts";
 import { formatMetricValue, metricConfig } from "@/lib/metrics";
+import { computeChartDomain } from "@/lib/chart-domain";
 import type { ComparisonMetric } from "@/lib/types";
 
 export type { ComparisonMetric };
@@ -21,7 +22,6 @@ export type ComparisonChartItem = {
   testDate: string;
   value: number;
 };
-
 
 type ComparisonChartProps = {
   metric: ComparisonMetric;
@@ -96,14 +96,7 @@ export function ComparisonChart({ metric, data }: ComparisonChartProps) {
   const medianValue = median(athleteValues);
   const values = sortedData.map((item) => item.value);
 
-  const minValue = values.length > 0 ? Math.min(...values) : 0;
-  const maxValue = values.length > 0 ? Math.max(...values) : 0;
-
-  const range = maxValue - minValue;
-
-  const padding = range > 0 ? range * 0.2 : Math.max(Math.abs(minValue) * 0.1, 1);
-
-  const domain: [number, number] = [Math.max(0, minValue - padding), maxValue + padding];
+  const domain = computeChartDomain(values);
 
   return (
     <section className="rounded-xl border border-zinc-200 bg-white p-5">
@@ -158,7 +151,10 @@ export function ComparisonChart({ metric, data }: ComparisonChartProps) {
 
           <YAxis type="category" dataKey="label" width={135} tickLine={false} axisLine={false} />
 
-          <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<ScatterTooltip metric={metric} />} />
+          <Tooltip
+            cursor={{ strokeDasharray: "3 3" }}
+            content={<ScatterTooltip metric={metric} />}
+          />
 
           {medianValue !== null && <ReferenceLine x={medianValue} strokeDasharray="4 4" />}
 

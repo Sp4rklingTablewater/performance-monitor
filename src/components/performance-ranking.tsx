@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { BirthYearMultiSelect } from "@/components/birth-year-multi-select";
 import { metricConfig } from "@/lib/metrics";
-import { buildRankingTable, getAvailableYears, rankingMetrics } from "@/lib/ranking";
+import {
+  buildRankingTable,
+  getAvailableBirthYears,
+  getAvailableYears,
+  rankingMetrics,
+} from "@/lib/ranking";
 import type { ComparisonMetric, ComparisonTest } from "@/lib/types";
 
 type PerformanceRankingProps = {
@@ -30,19 +35,7 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
   const [sortMetric, setSortMetric] = useState<ComparisonMetric>("jump_height");
   const [showReferences, setShowReferences] = useState(true);
 
-  const availableBirthYears = useMemo(() => {
-    return Array.from(
-      new Set(
-        tests
-          .filter(
-            (test) =>
-              test.participant.participant_type === "athlete" &&
-              test.participant.birth_year !== null,
-          )
-          .map((test) => test.participant.birth_year as number),
-      ),
-    ).sort((a, b) => a - b);
-  }, [tests]);
+  const availableBirthYears = useMemo(() => getAvailableBirthYears(tests), [tests]);
 
   const availableYears = useMemo(() => getAvailableYears(tests), [tests]);
 
@@ -53,8 +46,7 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
   }, [availableYears, year]);
 
   const rows = useMemo(
-    () =>
-      year ? buildRankingTable(tests, { sortMetric, year, birthYears, showReferences }) : [],
+    () => (year ? buildRankingTable(tests, { sortMetric, year, birthYears, showReferences }) : []),
     [tests, sortMetric, year, birthYears, showReferences],
   );
 
@@ -198,23 +190,10 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
         )}
 
         <p className="mt-3 text-xs text-zinc-400">
-          * Wert aus einem früheren Testjahr fortgeschrieben (kein Test im gewählten Jahr vorhanden).
+          * Wert aus einem früheren Testjahr fortgeschrieben (kein Test im gewählten Jahr
+          vorhanden).
         </p>
       </section>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -14,6 +14,7 @@ import { DeletePerformanceTestPage } from "@/pages/delete-performance-test-page"
 import { ComparePage } from "@/pages/compare-page";
 import { NotFoundPage } from "@/pages/not-found-page";
 import { supabase } from "@/lib/supabase/client";
+import { queryKeys } from "@/lib/data";
 
 const router = createBrowserRouter(
   [
@@ -64,7 +65,7 @@ type AppProps = {
 export function App({ queryClient }: AppProps) {
   useEffect(() => {
     const subscription = supabase.auth.onAuthStateChange(() => {
-      queryClient.invalidateQueries({ queryKey: ["auth", "session"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.authSession });
     });
 
     return () => {

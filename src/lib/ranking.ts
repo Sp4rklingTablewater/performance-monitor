@@ -42,6 +42,24 @@ export function getAvailableYears(tests: ComparisonTest[]): number[] {
   );
 }
 
+/**
+ * Liefert alle Geburtsjahrgänge, die unter den Athlet:innen (keine
+ * Referenzen) vorkommen, aufsteigend sortiert. Grundlage für die
+ * Jahrgangs-Filter in Vergleich, Entwicklung und Ranking.
+ */
+export function getAvailableBirthYears(tests: ComparisonTest[]): number[] {
+  return Array.from(
+    new Set(
+      tests
+        .filter(
+          (test) =>
+            test.participant.participant_type === "athlete" && test.participant.birth_year !== null,
+        )
+        .map((test) => test.participant.birth_year as number),
+    ),
+  ).sort((a, b) => a - b);
+}
+
 function getEffectiveMetricValue(
   participantTests: ComparisonTest[],
   metric: ComparisonMetric,
@@ -147,16 +165,15 @@ export function buildRankingTable(
     return betterDirection === "higher" ? valueB - valueA : valueA - valueB;
   });
 
-  let rankedRows: RankingRow[] = [];
   let previousValue: number | null = null;
   let previousRank = 0;
 
-  withValue.forEach((row, index) => {
+  const rankedRows: RankingRow[] = withValue.map((row, index) => {
     const value = row.values[sortMetric].value as number;
     const rank = value === previousValue ? previousRank : index + 1;
     previousValue = value;
     previousRank = rank;
-    rankedRows = [...rankedRows, { ...row, rank }];
+    return { ...row, rank };
   });
 
   const unrankedRows: RankingRow[] = withoutValue.map((row) => ({ ...row, rank: null }));

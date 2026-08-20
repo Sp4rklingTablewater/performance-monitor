@@ -22,9 +22,16 @@ export function AthleteDetailPage() {
     enabled: !!id && !!participantQuery.data,
   });
 
-  const chronologicalTests = useMemo(
-    () => [...(testsQuery.data ?? [])].reverse(),
+  // Einmal pro Test die abgeleitete Sprunghöhe berechnen und sowohl für die
+  // Charts (aufsteigend) als auch die Tabelle (absteigend) wiederverwenden.
+  const testsWithJumpHeight = useMemo(
+    () => (testsQuery.data ?? []).map((test) => ({ ...test, jumpHeight: computeJumpHeight(test) })),
     [testsQuery.data],
+  );
+
+  const chronologicalTests = useMemo(
+    () => [...testsWithJumpHeight].reverse(),
+    [testsWithJumpHeight],
   );
 
   const reachHeightData = chronologicalTests
@@ -36,10 +43,10 @@ export function AthleteDetailPage() {
     .map((test) => ({ date: formatTestDate(test.test_date), value: Number(test.jump_reach_cm) }));
 
   const jumpHeightData = chronologicalTests
-    .filter((test) => computeJumpHeight(test) !== null)
+    .filter((test) => test.jumpHeight !== null)
     .map((test) => ({
       date: formatTestDate(test.test_date),
-      value: computeJumpHeight(test) as number,
+      value: test.jumpHeight as number,
     }));
 
   const sprintData = chronologicalTests
@@ -78,7 +85,7 @@ export function AthleteDetailPage() {
     return <NotFoundPage />;
   }
 
-  const tests = testsQuery.data ?? [];
+  const tests = testsWithJumpHeight;
 
   return (
     <>
@@ -177,8 +184,6 @@ export function AthleteDetailPage() {
             </div>
           ) : (
             tests.map((test) => {
-              const jumpHeight = computeJumpHeight(test);
-
               return (
                 <div
                   key={test.id}
@@ -188,7 +193,7 @@ export function AthleteDetailPage() {
                   <span>{test.age_group ?? "-"}</span>
                   <span>{test.reach_height_cm !== null ? `${test.reach_height_cm} cm` : "-"}</span>
                   <span>{test.jump_reach_cm !== null ? `${test.jump_reach_cm} cm` : "-"}</span>
-                  <span>{jumpHeight !== null ? `${jumpHeight} cm` : "-"}</span>
+                  <span>{test.jumpHeight !== null ? `${test.jumpHeight} cm` : "-"}</span>
                   <span>
                     {test.sprint_93639_seconds !== null ? `${test.sprint_93639_seconds} s` : "-"}
                   </span>

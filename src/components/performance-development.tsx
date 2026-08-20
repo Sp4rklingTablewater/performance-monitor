@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { BirthYearMultiSelect } from "@/components/birth-year-multi-select";
 import { DevelopmentChart } from "@/components/development-chart";
 import { buildDevelopmentData } from "@/lib/development";
+import { getAvailableBirthYears } from "@/lib/ranking";
 import type { ComparisonTest, DevelopmentMetric } from "@/lib/types";
 
 type PerformanceDevelopmentProps = {
@@ -21,19 +22,7 @@ export function PerformanceDevelopment({ tests }: PerformanceDevelopmentProps) {
   const [metric, setMetric] = useState<DevelopmentMetric>("jump_height");
   const [showReferences, setShowReferences] = useState(true);
 
-  const availableBirthYears = useMemo(() => {
-    return Array.from(
-      new Set(
-        tests
-          .filter(
-            (test) =>
-              test.participant.participant_type === "athlete" &&
-              test.participant.birth_year !== null,
-          )
-          .map((test) => test.participant.birth_year as number),
-      ),
-    ).sort((a, b) => a - b);
-  }, [tests]);
+  const availableBirthYears = useMemo(() => getAvailableBirthYears(tests), [tests]);
 
   const { points, series, athleteCount } = useMemo(
     () => buildDevelopmentData(tests, { metric, birthYears, showReferences }),
@@ -90,9 +79,3 @@ export function PerformanceDevelopment({ tests }: PerformanceDevelopmentProps) {
     </div>
   );
 }
-
-
-
-
-
-

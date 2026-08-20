@@ -36,3 +36,24 @@ export function parseParticipantType(value: FormDataEntryValue | null): "athlete
 
   throw new Error("Ungültiger Typ.");
 }
+
+export type PerformanceTestFormValues = {
+  testDate: string;
+  ageGroup: string | null;
+  reachHeight: number | null;
+  jumpReach: number | null;
+  sprint: number | null;
+  ballControl: number | null;
+};
+
+/** Liest und validiert die Felder des Leistungstest-Formulars (Neuanlage & Bearbeitung). */
+export function parsePerformanceTestForm(formData: FormData): PerformanceTestFormValues {
+  return {
+    testDate: requireString(formData.get("test_date"), "Testdatum"),
+    ageGroup: parseOptionalString(formData.get("age_group")),
+    reachHeight: parseNullableNumber(formData.get("reach_height_cm")),
+    jumpReach: parseNullableNumber(formData.get("jump_reach_cm")),
+    sprint: parseNullableNumber(formData.get("sprint_93639_seconds")),
+    ballControl: parseNullableNumber(formData.get("ball_control_count")),
+  };
+}

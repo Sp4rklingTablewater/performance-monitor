@@ -1,4 +1,5 @@
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
+import { computeChartDomain } from "@/lib/chart-domain";
 
 type ChartPoint = {
   date: string;
@@ -26,14 +27,7 @@ export function PerformanceLineChart({
   const cleanData = data.filter((point) => Number.isFinite(point.value));
   const values = cleanData.map((point) => point.value);
 
-  const minValue = values.length > 0 ? Math.min(...values) : 0;
-  const maxValue = values.length > 0 ? Math.max(...values) : 0;
-
-  const range = maxValue - minValue;
-
-  const padding = range > 0 ? range * 0.25 : Math.max(Math.abs(minValue) * 0.1, 1);
-
-  const domain: [number, number] = [Math.max(0, minValue - padding), maxValue + padding];
+  const domain = computeChartDomain(values, 0.25);
 
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-5">
@@ -75,9 +69,7 @@ export function PerformanceLineChart({
             tickFormatter={(value) => Number(value).toFixed(decimals)}
           />
 
-          <Tooltip
-            formatter={(value) => [`${Number(value).toFixed(decimals)} ${unit}`, title]}
-          />
+          <Tooltip formatter={(value) => [`${Number(value).toFixed(decimals)} ${unit}`, title]} />
 
           <Line
             type="linear"

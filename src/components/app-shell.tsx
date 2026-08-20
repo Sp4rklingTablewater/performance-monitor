@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { logout } from "@/lib/auth";
+import { queryKeys } from "@/lib/data";
 
 type AppShellProps = {
   children: ReactNode;
@@ -14,7 +15,7 @@ export function AppShell({ children }: AppShellProps) {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["auth", "session"] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.authSession });
       navigate("/login", { replace: true });
     },
   });
@@ -34,7 +35,10 @@ export function AppShell({ children }: AppShellProps) {
         </div>
 
         <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-6 pb-3 md:hidden">
-          <Link to="/athletes" className="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-zinc-100">
+          <Link
+            to="/athletes"
+            className="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-zinc-100"
+          >
             Athlet:innen
           </Link>
           <Link to="/compare" className="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-zinc-100">

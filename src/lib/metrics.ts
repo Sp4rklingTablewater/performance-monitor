@@ -1,4 +1,4 @@
-import type { ComparisonMetric, ComparisonTest, PerformanceTest } from "@/lib/types";
+import type { ComparisonMetric, ComparisonTest, Participant, PerformanceTest } from "@/lib/types";
 
 type JumpHeightInput = Pick<PerformanceTest, "reach_height_cm" | "jump_reach_cm">;
 
@@ -39,6 +39,28 @@ export function getComparisonMetricValue(
   }
 
   return test.ball_control_count;
+}
+
+type LabelParticipant = Pick<Participant, "name" | "birth_year" | "participant_type">;
+
+/**
+ * Baut das Anzeige-Label für eine:n Teilnehmer:in in Charts/Tabellen.
+ * Referenzen erhalten den Zusatz „(Ref.)“, Athlet:innen den Jahrgang in
+ * Klammern – aber nur, wenn `showBirthYear` true ist (z. B. weil mehrere
+ * Jahrgänge gleichzeitig angezeigt werden und der Jahrgang sonst nicht
+ * eindeutig wäre).
+ */
+export function buildParticipantLabel(
+  participant: LabelParticipant,
+  { showBirthYear }: { showBirthYear: boolean },
+): string {
+  if (participant.participant_type === "reference") {
+    return `${participant.name} (Ref.)`;
+  }
+
+  return showBirthYear
+    ? `${participant.name} (${participant.birth_year ?? "-"})`
+    : participant.name;
 }
 
 export type MetricConfig = {
@@ -86,5 +108,3 @@ export const metricConfig: Record<ComparisonMetric, MetricConfig> = {
 export function formatMetricValue(value: number | string, metric: ComparisonMetric): string {
   return Number(value).toFixed(metricConfig[metric].decimals);
 }
-
-
