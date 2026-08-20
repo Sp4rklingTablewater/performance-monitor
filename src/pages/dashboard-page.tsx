@@ -10,8 +10,8 @@ export function DashboardPage() {
   return (
     <>
       <header className="mb-10">
-        <p className="text-sm font-medium text-zinc-500">Uebersicht</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Leistungsuebersicht</h1>
+        <p className="text-sm font-medium text-zinc-500">Übersicht</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Leistungsübersicht</h1>
       </header>
 
       {isError ? <p className="mb-4 text-sm text-red-700">{error.message}</p> : null}
@@ -22,7 +22,7 @@ export function DashboardPage() {
           value={isPending ? "..." : String(data?.participants ?? "-")}
         />
         <StatCard title="Leistungstests" value={isPending ? "..." : String(data?.tests ?? "-")} />
-        <StatCard title="Jahrgaenge" value={isPending ? "..." : String(data?.yearCount ?? "-")} />
+        <StatCard title="Jahrgänge" value={isPending ? "..." : String(data?.yearCount ?? "-")} />
         <StatCard title="Referenzen" value={isPending ? "..." : String(data?.references ?? "-")} />
       </section>
     </>

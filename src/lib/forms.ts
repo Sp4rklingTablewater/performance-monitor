@@ -14,7 +14,7 @@ export function parseNullableNumber(value: FormDataEntryValue | null): number | 
   const parsed = Number(value);
 
   if (!Number.isFinite(parsed)) {
-    throw new Error("Ungueltiger Zahlenwert.");
+    throw new Error("Ungültiger Zahlenwert.");
   }
 
   return parsed;
@@ -34,5 +34,5 @@ export function parseParticipantType(value: FormDataEntryValue | null): "athlete
     return value;
   }
 
-  throw new Error("Ungueltiger Typ.");
+  throw new Error("Ungültiger Typ.");
 }

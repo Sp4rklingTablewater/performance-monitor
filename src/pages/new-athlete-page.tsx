@@ -31,7 +31,7 @@ export function NewAthletePage() {
     <>
       <header className="mb-8">
         <p className="text-sm font-medium text-zinc-500">Athlet:innen</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Athlet:in hinzufuegen</h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Athlet:in hinzufügen</h1>
       </header>
 
       <form

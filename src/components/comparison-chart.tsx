@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { metricConfig } from "@/lib/metrics";
 import type { ComparisonMetric } from "@/lib/types";
 
 export type { ComparisonMetric };
@@ -21,23 +22,6 @@ export type ComparisonChartItem = {
   value: number;
 };
 
-const metricConfig = {
-  jump_height: {
-    label: "Sprung absolut",
-    unit: "cm",
-    betterDirection: "higher",
-  },
-  sprint_93639: {
-    label: "9-3-6-3-9",
-    unit: "s",
-    betterDirection: "lower",
-  },
-  ball_control: {
-    label: "Ballkontrolle",
-    unit: "",
-    betterDirection: "higher",
-  },
-} as const;
 
 type ComparisonChartProps = {
   metric: ComparisonMetric;

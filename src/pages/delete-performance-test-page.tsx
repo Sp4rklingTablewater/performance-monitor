@@ -42,7 +42,7 @@ export function DeletePerformanceTestPage() {
       }
     },
     onError: (error) => {
-      setErrorMessage(error instanceof Error ? error.message : "Loeschen fehlgeschlagen.");
+      setErrorMessage(error instanceof Error ? error.message : "Löschen fehlgeschlagen.");
     },
   });
 
@@ -76,14 +76,14 @@ export function DeletePerformanceTestPage() {
           to={`/athletes/${participant.id}/tests/${test.id}/edit`}
           className="text-sm text-zinc-500 hover:text-zinc-900"
         >
-          {"<- Zurueck"}
+          {"<- Zurück"}
         </Link>
 
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight">Leistungstest loeschen</h1>
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight">Leistungstest löschen</h1>
       </header>
 
       <div className="max-w-xl rounded-xl border border-red-200 bg-white p-6">
-        <p className="font-medium">Moechtest du diesen Leistungstest wirklich loeschen?</p>
+        <p className="font-medium">Möchtest du diesen Leistungstest wirklich löschen?</p>
 
         <div className="mt-4 text-sm text-zinc-600">
           <p>{participant.name}</p>
@@ -93,7 +93,7 @@ export function DeletePerformanceTestPage() {
           </p>
         </div>
 
-        <p className="mt-4 text-sm text-red-700">Der Leistungstest wird dauerhaft geloescht.</p>
+        <p className="mt-4 text-sm text-red-700">Der Leistungstest wird dauerhaft gelöscht.</p>
         {errorMessage ? <p className="mt-3 text-sm text-red-700">{errorMessage}</p> : null}
 
         <div className="mt-6 flex gap-3">
@@ -103,7 +103,7 @@ export function DeletePerformanceTestPage() {
             disabled={mutation.isPending}
             className="rounded-lg bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-60"
           >
-            {mutation.isPending ? "Loescht..." : "Endgueltig loeschen"}
+            {mutation.isPending ? "Löscht..." : "Endgültig löschen"}
           </button>
 
           <Link

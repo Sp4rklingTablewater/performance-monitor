@@ -147,7 +147,7 @@ export function EditAthletePage() {
             disabled={mutation.isPending}
             className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-60"
           >
-            {mutation.isPending ? "Speichert..." : "Aenderungen speichern"}
+            {mutation.isPending ? "Speichert..." : "Änderungen speichern"}
           </button>
 
           <Link

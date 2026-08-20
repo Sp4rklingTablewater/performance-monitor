@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { ComparisonChart, type ComparisonChartItem } from "@/components/comparison-chart";
 import { ageGroupOrder, defaultAgeGroup } from "@/lib/constants";
-import { computeJumpHeight } from "@/lib/metrics";
+import { getComparisonMetricValue } from "@/lib/metrics";
 import type { ComparisonMetric, ComparisonTest } from "@/lib/types";
 
 type PerformanceComparisonProps = {
@@ -9,18 +9,6 @@ type PerformanceComparisonProps = {
 };
 
 type MetricFilter = "all" | ComparisonMetric;
-
-function getMetricValue(test: ComparisonTest, metric: ComparisonMetric): number | null {
-  if (metric === "jump_height") {
-    return computeJumpHeight(test);
-  }
-
-  if (metric === "sprint_93639") {
-    return test.sprint_93639_seconds === null ? null : Number(test.sprint_93639_seconds);
-  }
-
-  return test.ball_control_count;
-}
 
 export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
   const [birthYear, setBirthYear] = useState("all");
@@ -72,7 +60,7 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
         return true;
       })
       .map((test) => {
-        const value = getMetricValue(test, selectedMetric);
+        const value = getComparisonMetricValue(test, selectedMetric);
 
         if (value === null) {
           return null;
@@ -98,6 +86,8 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
       .filter((item): item is ComparisonChartItem => item !== null);
   }
 
+  const reachHeightData = getChartData("reach_height");
+  const jumpReachData = getChartData("jump_reach");
   const jumpHeightData = getChartData("jump_height");
   const sprintData = getChartData("sprint_93639");
   const ballControlData = getChartData("ball_control");
@@ -113,7 +103,7 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
               onChange={(event) => setBirthYear(event.target.value)}
               className="w-full rounded-lg border border-zinc-300 px-3 py-2"
             >
-              <option value="all">Alle Jahrgaenge</option>
+              <option value="all">Alle Jahrgänge</option>
               {birthYears.map((year) => (
                 <option key={year} value={year}>
                   {year}
@@ -138,13 +128,15 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Messgroesse</label>
+            <label className="mb-1 block text-sm font-medium">Messgröße</label>
             <select
               value={metric}
               onChange={(event) => setMetric(event.target.value as MetricFilter)}
               className="w-full rounded-lg border border-zinc-300 px-3 py-2"
             >
-              <option value="all">Alle Messgroessen</option>
+              <option value="all">Alle Messgrößen</option>
+              <option value="reach_height">Reichhöhe im Stand</option>
+              <option value="jump_reach">Reichhöhe im Sprung</option>
               <option value="jump_height">Sprung absolut</option>
               <option value="sprint_93639">9-3-6-3-9</option>
               <option value="ball_control">Ballkontrolle</option>
@@ -163,7 +155,19 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
       </section>
 
       {metric === "all" ? (
-        <div className="grid gap-4 xl:grid-cols-3">
+        <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
+          <ComparisonChart
+            metric="reach_height"
+            data={reachHeightData}
+            birthYear={birthYear}
+            ageGroup={ageGroup}
+          />
+          <ComparisonChart
+            metric="jump_reach"
+            data={jumpReachData}
+            birthYear={birthYear}
+            ageGroup={ageGroup}
+          />
           <ComparisonChart
             metric="jump_height"
             data={jumpHeightData}
@@ -187,11 +191,15 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
         <ComparisonChart
           metric={metric}
           data={
-            metric === "jump_height"
-              ? jumpHeightData
-              : metric === "sprint_93639"
-                ? sprintData
-                : ballControlData
+            metric === "reach_height"
+              ? reachHeightData
+              : metric === "jump_reach"
+                ? jumpReachData
+                : metric === "jump_height"
+                  ? jumpHeightData
+                  : metric === "sprint_93639"
+                    ? sprintData
+                    : ballControlData
           }
           birthYear={birthYear}
           ageGroup={ageGroup}

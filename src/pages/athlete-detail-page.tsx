@@ -27,6 +27,14 @@ export function AthleteDetailPage() {
     [testsQuery.data],
   );
 
+  const reachHeightData = chronologicalTests
+    .filter((test) => test.reach_height_cm !== null)
+    .map((test) => ({ date: formatTestDate(test.test_date), value: Number(test.reach_height_cm) }));
+
+  const jumpReachData = chronologicalTests
+    .filter((test) => test.jump_reach_cm !== null)
+    .map((test) => ({ date: formatTestDate(test.test_date), value: Number(test.jump_reach_cm) }));
+
   const jumpHeightData = chronologicalTests
     .filter((test) => computeJumpHeight(test) !== null)
     .map((test) => ({
@@ -43,7 +51,10 @@ export function AthleteDetailPage() {
 
   const ballControlData = chronologicalTests
     .filter((test) => test.ball_control_count !== null)
-    .map((test) => ({ date: formatTestDate(test.test_date), value: test.ball_control_count }));
+    .map((test) => ({
+      date: formatTestDate(test.test_date),
+      value: test.ball_control_count as number,
+    }));
 
   if (participantQuery.isPending || testsQuery.isPending) {
     return <p className="text-sm text-zinc-500">Lade Athlet:in...</p>;
@@ -97,7 +108,7 @@ export function AthleteDetailPage() {
               to={`/athletes/${participant.id}/tests/new`}
               className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
             >
-              Test hinzufuegen
+              Test hinzufügen
             </Link>
           </div>
         </div>
@@ -107,11 +118,23 @@ export function AthleteDetailPage() {
         <div className="mb-4">
           <h2 className="text-lg font-semibold">Entwicklung</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Leistungsentwicklung ueber alle erfassten Testzeitpunkte.
+            Leistungsentwicklung über alle erfassten Testzeitpunkte.
           </p>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          <PerformanceLineChart
+            title="Reichhöhe im Stand"
+            unit="cm"
+            data={reachHeightData}
+            betterDirection="higher"
+          />
+          <PerformanceLineChart
+            title="Reichhöhe im Sprung"
+            unit="cm"
+            data={jumpReachData}
+            betterDirection="higher"
+          />
           <PerformanceLineChart
             title="Sprung absolut"
             unit="cm"
@@ -140,8 +163,8 @@ export function AthleteDetailPage() {
           <div className="grid grid-cols-[110px_100px_repeat(5,1fr)_80px] gap-4 border-b border-zinc-200 px-5 py-3 text-sm font-medium text-zinc-500">
             <span>Datum</span>
             <span>Altersklasse</span>
-            <span>Reichhoehe</span>
-            <span>Sprunghoehe</span>
+            <span>Reichhöhe im Stand</span>
+            <span>Reichhöhe im Sprung</span>
             <span>Sprung absolut</span>
             <span>9-3-6-3-9</span>
             <span>Ballkontrolle</span>
@@ -174,7 +197,7 @@ export function AthleteDetailPage() {
                     to={`/athletes/${participant.id}/tests/${test.id}/edit`}
                     className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
                   >
-                    Aendern
+                    Ändern
                   </Link>
                 </div>
               );

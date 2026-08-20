@@ -29,7 +29,7 @@ export function LoginPage() {
   });
 
   if (isPending) {
-    return <main className="p-6 text-sm text-zinc-500">Pruefe Anmeldung...</main>;
+    return <main className="p-6 text-sm text-zinc-500">Prüfe Anmeldung...</main>;
   }
 
   if (session) {
@@ -85,7 +85,7 @@ export function LoginPage() {
             disabled={mutation.isPending}
             className="w-full rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white disabled:opacity-60"
           >
-            {mutation.isPending ? "Anmeldung laeuft..." : "Anmelden"}
+            {mutation.isPending ? "Anmeldung läuft..." : "Anmelden"}
           </button>
         </form>
       </div>

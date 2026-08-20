@@ -84,7 +84,7 @@ export function NewPerformanceTestPage() {
         >
           {`<- ${participant.name}`}
         </Link>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight">Leistungstest hinzufuegen</h1>
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight">Leistungstest hinzufügen</h1>
         <p className="mt-2 text-sm text-zinc-500">
           {participant.name}
           {participant.birth_year ? ` · Jahrgang ${participant.birth_year}` : ""}
@@ -145,8 +145,8 @@ function TestFields() {
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <NumberField id="reach_height_cm" label="Reichhoehe" unit="cm" min="1" step="1" />
-        <NumberField id="jump_reach_cm" label="Sprunghoehe" unit="cm" min="1" step="1" />
+        <NumberField id="reach_height_cm" label="Reichhöhe" unit="cm" min="1" step="1" />
+        <NumberField id="jump_reach_cm" label="Sprunghöhe" unit="cm" min="1" step="1" />
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">

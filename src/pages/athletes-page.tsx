@@ -23,7 +23,7 @@ export function AthletesPage() {
             to="/athletes/new"
             className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
           >
-            Athlet:in hinzufuegen
+            Athlet:in hinzufügen
           </Link>
         </div>
       </header>

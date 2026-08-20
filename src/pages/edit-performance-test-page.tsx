@@ -130,14 +130,14 @@ export function EditPerformanceTestPage() {
         <div className="grid gap-6 sm:grid-cols-2">
           <NumberField
             id="reach_height_cm"
-            label="Reichhoehe"
+            label="Reichhöhe"
             defaultValue={test.reach_height_cm}
             step="1"
             min="1"
           />
           <NumberField
             id="jump_reach_cm"
-            label="Sprunghoehe"
+            label="Sprunghöhe"
             defaultValue={test.jump_reach_cm}
             step="1"
             min="1"
@@ -169,7 +169,7 @@ export function EditPerformanceTestPage() {
             disabled={mutation.isPending}
             className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-60"
           >
-            {mutation.isPending ? "Speichert..." : "Aenderungen speichern"}
+            {mutation.isPending ? "Speichert..." : "Änderungen speichern"}
           </button>
 
           <Link
@@ -183,7 +183,7 @@ export function EditPerformanceTestPage() {
             to={`/athletes/${participant.id}/tests/${test.id}/delete`}
             className="ml-auto rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
           >
-            Test loeschen
+            Test löschen
           </Link>
         </div>
       </form>

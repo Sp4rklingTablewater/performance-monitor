@@ -36,7 +36,7 @@ export async function updateParticipant(
     .eq("id", participantId);
 
   if (error) {
-    throw new Error(`Athlet:in konnte nicht geaendert werden: ${error.message}`);
+    throw new Error(`Athlet:in konnte nicht geändert werden: ${error.message}`);
   }
 }
 
@@ -92,7 +92,7 @@ export async function updatePerformanceTest(
     .eq("participant_id", participantId);
 
   if (error) {
-    throw new Error(`Leistungstest konnte nicht geaendert werden: ${error.message}`);
+    throw new Error(`Leistungstest konnte nicht geändert werden: ${error.message}`);
   }
 }
 
@@ -104,6 +104,6 @@ export async function deletePerformanceTest(participantId: string, testId: strin
     .eq("participant_id", participantId);
 
   if (error) {
-    throw new Error(`Leistungstest konnte nicht geloescht werden: ${error.message}`);
+    throw new Error(`Leistungstest konnte nicht gelöscht werden: ${error.message}`);
   }
 }
