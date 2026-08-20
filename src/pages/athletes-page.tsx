@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { fetchParticipants, queryKeys } from "@/lib/data";
+import { fetchDashboardStats, fetchParticipants, queryKeys } from "@/lib/data";
 
 export function AthletesPage() {
   const {
@@ -11,6 +11,11 @@ export function AthletesPage() {
   } = useQuery({
     queryKey: queryKeys.participants,
     queryFn: fetchParticipants,
+  });
+
+  const { data: stats, isPending: statsPending } = useQuery({
+    queryKey: queryKeys.dashboard,
+    queryFn: fetchDashboardStats,
   });
 
   return (
@@ -26,6 +31,25 @@ export function AthletesPage() {
           </Link>
         </div>
       </header>
+
+      <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Athlet:innen"
+          value={statsPending ? "..." : String(stats?.participants ?? "-")}
+        />
+        <StatCard
+          title="Leistungstests"
+          value={statsPending ? "..." : String(stats?.tests ?? "-")}
+        />
+        <StatCard
+          title="Jahrgänge"
+          value={statsPending ? "..." : String(stats?.yearCount ?? "-")}
+        />
+        <StatCard
+          title="Referenzen"
+          value={statsPending ? "..." : String(stats?.references ?? "-")}
+        />
+      </section>
 
       {isError ? <p className="mb-4 text-sm text-red-700">{error.message}</p> : null}
 
@@ -62,5 +86,19 @@ export function AthletesPage() {
         )}
       </div>
     </>
+  );
+}
+
+type StatCardProps = {
+  title: string;
+  value: string;
+};
+
+function StatCard({ title, value }: StatCardProps) {
+  return (
+    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+      <p className="text-sm text-zinc-500">{title}</p>
+      <p className="mt-2 text-3xl font-semibold">{value}</p>
+    </div>
   );
 }

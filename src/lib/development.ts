@@ -20,7 +20,8 @@ export type DevelopmentData = {
 
 type BuildDevelopmentDataOptions = {
   metric: DevelopmentMetric;
-  birthYear: string;
+  /** Leeres Array = keine Einschränkung (alle Jahrgänge). */
+  birthYears: number[];
   showReferences: boolean;
 };
 
@@ -31,9 +32,13 @@ type BuildDevelopmentDataOptions = {
  */
 export function buildDevelopmentData(
   tests: ComparisonTest[],
-  { metric, birthYear, showReferences }: BuildDevelopmentDataOptions,
+  { metric, birthYears, showReferences }: BuildDevelopmentDataOptions,
 ): DevelopmentData {
   const validAgeGroups = new Set<string>(ageGroupOrder);
+
+  // Bei genau einem gewählten Jahrgang ist er für alle gezeigten Athlet:innen
+  // gleich und muss im Namen nicht wiederholt werden.
+  const showBirthYearInLabel = birthYears.length !== 1;
 
   const participantEntries = new Map<
     string,
@@ -52,7 +57,11 @@ export function buildDevelopmentData(
       continue;
     }
 
-    if (!isReference && birthYear !== "all" && participant.birth_year !== Number(birthYear)) {
+    if (
+      !isReference &&
+      birthYears.length > 0 &&
+      (participant.birth_year === null || !birthYears.includes(participant.birth_year))
+    ) {
       continue;
     }
 
@@ -64,7 +73,7 @@ export function buildDevelopmentData(
 
     const label = isReference
       ? `${participant.name} (Ref.)`
-      : birthYear === "all"
+      : showBirthYearInLabel
         ? `${participant.name} (${participant.birth_year ?? "-"})`
         : participant.name;
 
@@ -102,4 +111,5 @@ export function buildDevelopmentData(
 
   return { points, series, athleteCount };
 }
+
 

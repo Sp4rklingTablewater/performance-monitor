@@ -39,7 +39,7 @@ export function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6">
       <div className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-6">
-        <h1 className="text-2xl font-semibold">Anmelden</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Anmelden</h1>
 
         <form
           className="mt-6 space-y-4"

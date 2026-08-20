@@ -59,7 +59,7 @@ export function PerformanceLineChart({
             top: 10,
             right: 15,
             bottom: 5,
-            left: 0,
+            left: 10,
           }}
         >
           <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -70,7 +70,7 @@ export function PerformanceLineChart({
             domain={domain}
             tickLine={false}
             axisLine={false}
-            width={45}
+            width={60}
             unit={unit}
             tickFormatter={(value) => Number(value).toFixed(decimals)}
           />

@@ -1,9 +1,8 @@
 import { useEffect } from "react";
 import type { QueryClient } from "@tanstack/react-query";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Navigate, RouterProvider, createBrowserRouter } from "react-router-dom";
 import { RootLayout } from "@/components/root-layout";
 import { RequireAuth } from "@/components/require-auth";
-import { DashboardPage } from "@/pages/dashboard-page";
 import { LoginPage } from "@/pages/login-page";
 import { AthletesPage } from "@/pages/athletes-page";
 import { NewAthletePage } from "@/pages/new-athlete-page";
@@ -28,7 +27,7 @@ const router = createBrowserRouter(
         {
           element: <RootLayout />,
           children: [
-            { path: "/", element: <DashboardPage /> },
+            { path: "/", element: <Navigate to="/athletes" replace /> },
             { path: "/athletes", element: <AthletesPage /> },
             { path: "/athletes/new", element: <NewAthletePage /> },
             { path: "/athletes/:id", element: <AthleteDetailPage /> },

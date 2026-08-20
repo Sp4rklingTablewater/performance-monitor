@@ -80,7 +80,7 @@ export function DevelopmentChart({
             top: 10,
             right: 25,
             bottom: 5,
-            left: 0,
+            left: 10,
           }}
         >
           <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -91,7 +91,7 @@ export function DevelopmentChart({
             domain={domain}
             tickLine={false}
             axisLine={false}
-            width={50}
+            width={64}
             unit={config.unit}
             tickFormatter={(value) => formatMetricValue(value, metric)}
           />
@@ -124,6 +124,7 @@ export function DevelopmentChart({
     </section>
   );
 }
+
 
 
 

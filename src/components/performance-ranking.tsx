@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { BirthYearMultiSelect } from "@/components/birth-year-multi-select";
 import { metricConfig } from "@/lib/metrics";
 import { buildRankingTable, getAvailableYears, rankingMetrics } from "@/lib/ranking";
 import type { ComparisonMetric, ComparisonTest } from "@/lib/types";
@@ -59,12 +60,6 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
 
   const athleteCount = rows.filter((row) => row.participantType === "athlete").length;
 
-  function toggleBirthYear(value: number) {
-    setBirthYears((current) =>
-      current.includes(value) ? current.filter((year) => year !== value) : [...current, value],
-    );
-  }
-
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-zinc-200 bg-white p-5">
@@ -89,44 +84,11 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
             </select>
           </div>
 
-          <div>
-            <div className="mb-1 flex items-center justify-between">
-              <label className="block text-sm font-medium">Jahrgänge</label>
-              {birthYears.length > 0 ? (
-                <button
-                  type="button"
-                  onClick={() => setBirthYears([])}
-                  className="text-xs font-medium text-zinc-500 hover:text-zinc-900"
-                >
-                  Zurücksetzen
-                </button>
-              ) : null}
-            </div>
-            <div className="h-10 flex flex-wrap gap-1 overflow-y-auto rounded-lg border border-zinc-300 px-2 py-1.5">
-              {availableBirthYears.length === 0 ? (
-                <span className="py-0.5 text-sm text-zinc-400">Keine Jahrgänge vorhanden</span>
-              ) : (
-                availableBirthYears.map((option) => {
-                  const isSelected = birthYears.includes(option);
-
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => toggleBirthYear(option)}
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        isSelected
-                          ? "bg-zinc-900 text-white"
-                          : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          </div>
+          <BirthYearMultiSelect
+            availableYears={availableBirthYears}
+            selectedYears={birthYears}
+            onChange={setBirthYears}
+          />
 
           <div>
             <label className="mb-1 block text-sm font-medium">Rang nach</label>
@@ -242,6 +204,9 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
     </div>
   );
 }
+
+
+
 
 
 

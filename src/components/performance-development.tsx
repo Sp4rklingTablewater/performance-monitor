@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { BirthYearMultiSelect } from "@/components/birth-year-multi-select";
 import { DevelopmentChart } from "@/components/development-chart";
 import { buildDevelopmentData } from "@/lib/development";
 import type { ComparisonTest, DevelopmentMetric } from "@/lib/types";
@@ -16,11 +17,11 @@ const developmentMetricOptions: { value: DevelopmentMetric; label: string }[] = 
 ];
 
 export function PerformanceDevelopment({ tests }: PerformanceDevelopmentProps) {
-  const [birthYear, setBirthYear] = useState("all");
+  const [birthYears, setBirthYears] = useState<number[]>([]);
   const [metric, setMetric] = useState<DevelopmentMetric>("jump_height");
   const [showReferences, setShowReferences] = useState(true);
 
-  const birthYears = useMemo(() => {
+  const availableBirthYears = useMemo(() => {
     return Array.from(
       new Set(
         tests
@@ -35,36 +36,26 @@ export function PerformanceDevelopment({ tests }: PerformanceDevelopmentProps) {
   }, [tests]);
 
   const { points, series, athleteCount } = useMemo(
-    () => buildDevelopmentData(tests, { metric, birthYear, showReferences }),
-    [tests, metric, birthYear, showReferences],
+    () => buildDevelopmentData(tests, { metric, birthYears, showReferences }),
+    [tests, metric, birthYears, showReferences],
   );
 
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-zinc-200 bg-white p-5">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <div>
-            <label className="mb-1 block text-sm font-medium">Jahrgang</label>
-            <select
-              value={birthYear}
-              onChange={(event) => setBirthYear(event.target.value)}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
-            >
-              <option value="all">Alle Jahrgänge</option>
-              {birthYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
+          <BirthYearMultiSelect
+            availableYears={availableBirthYears}
+            selectedYears={birthYears}
+            onChange={setBirthYears}
+          />
 
           <div>
             <label className="mb-1 block text-sm font-medium">Messgröße</label>
             <select
               value={metric}
               onChange={(event) => setMetric(event.target.value as DevelopmentMetric)}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className="h-10 w-full rounded-lg border border-zinc-300 px-3"
             >
               {developmentMetricOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -74,14 +65,19 @@ export function PerformanceDevelopment({ tests }: PerformanceDevelopmentProps) {
             </select>
           </div>
 
-          <label className="flex items-end gap-2 pb-2">
-            <input
-              type="checkbox"
-              checked={showReferences}
-              onChange={(event) => setShowReferences(event.target.checked)}
-            />
-            <span className="text-sm font-medium">Referenzen anzeigen</span>
-          </label>
+          <div>
+            <span aria-hidden="true" className="mb-1 hidden text-sm font-medium xl:block">
+              &nbsp;
+            </span>
+            <label className="flex h-10 items-center gap-2">
+              <input
+                type="checkbox"
+                checked={showReferences}
+                onChange={(event) => setShowReferences(event.target.checked)}
+              />
+              <span className="text-sm font-medium">Referenzen anzeigen</span>
+            </label>
+          </div>
         </div>
       </section>
 
@@ -94,6 +90,9 @@ export function PerformanceDevelopment({ tests }: PerformanceDevelopmentProps) {
     </div>
   );
 }
+
+
+
 
 
 
