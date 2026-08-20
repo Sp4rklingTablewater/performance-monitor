@@ -1,6 +1,6 @@
 import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import type { DevelopmentPoint, DevelopmentSeries } from "@/lib/development";
-import { metricConfig } from "@/lib/metrics";
+import { formatMetricValue, metricConfig } from "@/lib/metrics";
 import type { DevelopmentMetric } from "@/lib/types";
 
 const seriesColors = [
@@ -20,7 +20,6 @@ type DevelopmentChartProps = {
   metric: DevelopmentMetric;
   points: DevelopmentPoint[];
   series: DevelopmentSeries[];
-  birthYear: string;
   athleteCount: number;
 };
 
@@ -28,7 +27,6 @@ export function DevelopmentChart({
   metric,
   points,
   series,
-  birthYear,
   athleteCount,
 }: DevelopmentChartProps) {
   const config = metricConfig[metric];
@@ -36,7 +34,9 @@ export function DevelopmentChart({
   const values = points.flatMap((point) =>
     series
       .map((item) => point[item.id])
-      .filter((value): value is number => typeof value === "number"),
+      // `typeof NaN === "number"` ist true – Number.isFinite schließt NaN korrekt aus
+      // und verhindert, dass ein einzelner ungültiger Wert Math.min/max vergiftet.
+      .filter((value): value is number => Number.isFinite(value)),
   );
 
   const minValue = values.length > 0 ? Math.min(...values) : 0;
@@ -55,10 +55,6 @@ export function DevelopmentChart({
           <h2 className="text-lg font-semibold">{config.label}</h2>
 
           <p className="mt-1 text-sm text-zinc-500">
-            {birthYear === "all" ? "Alle Jahrgänge" : `Jahrgang ${birthYear}`}
-            {" · "}
-            U13 → U14 → U16.2 → U16.1
-            {" · "}
             {config.betterDirection === "higher" ? "höher ist besser" : "niedriger ist besser"}
           </p>
         </div>
@@ -91,10 +87,20 @@ export function DevelopmentChart({
 
           <XAxis dataKey="ageGroup" tickLine={false} axisLine={false} />
 
-          <YAxis domain={domain} tickLine={false} axisLine={false} width={50} unit={config.unit} />
+          <YAxis
+            domain={domain}
+            tickLine={false}
+            axisLine={false}
+            width={50}
+            unit={config.unit}
+            tickFormatter={(value) => formatMetricValue(value, metric)}
+          />
 
           <Tooltip
-            formatter={(value, name) => [`${value}${config.unit ? ` ${config.unit}` : ""}`, name]}
+            formatter={(value, name) => [
+              `${formatMetricValue(value, metric)}${config.unit ? ` ${config.unit}` : ""}`,
+              name,
+            ]}
           />
 
           <Legend />
@@ -118,4 +124,10 @@ export function DevelopmentChart({
     </section>
   );
 }
+
+
+
+
+
+
 

@@ -10,8 +10,7 @@ export function DashboardPage() {
   return (
     <>
       <header className="mb-10">
-        <p className="text-sm font-medium text-zinc-500">Übersicht</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Leistungsübersicht</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Leistungsübersicht</h1>
       </header>
 
       {isError ? <p className="mb-4 text-sm text-red-700">{error.message}</p> : null}

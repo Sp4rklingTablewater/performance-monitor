@@ -45,6 +45,8 @@ export type MetricConfig = {
   label: string;
   unit: string;
   betterDirection: "higher" | "lower";
+  /** Anzahl sinnvoller Nachkommastellen für Anzeige/Achsenbeschriftung. */
+  decimals: number;
 };
 
 export const metricConfig: Record<ComparisonMetric, MetricConfig> = {
@@ -52,26 +54,37 @@ export const metricConfig: Record<ComparisonMetric, MetricConfig> = {
     label: "Reichhöhe im Stand",
     unit: "cm",
     betterDirection: "higher",
+    decimals: 0,
   },
   jump_reach: {
     label: "Reichhöhe im Sprung",
     unit: "cm",
     betterDirection: "higher",
+    decimals: 0,
   },
   jump_height: {
     label: "Sprung absolut",
     unit: "cm",
     betterDirection: "higher",
+    decimals: 0,
   },
   sprint_93639: {
     label: "9-3-6-3-9",
     unit: "s",
     betterDirection: "lower",
+    decimals: 2,
   },
   ball_control: {
     label: "Ballkontrolle",
     unit: "",
     betterDirection: "higher",
+    decimals: 0,
   },
 };
+
+/** Rundet einen Messwert auf die für die Messgröße sinnvolle Anzahl Nachkommastellen. */
+export function formatMetricValue(value: number | string, metric: ComparisonMetric): string {
+  return Number(value).toFixed(metricConfig[metric].decimals);
+}
+
 

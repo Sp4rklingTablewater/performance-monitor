@@ -13,12 +13,6 @@ const modeLabels: Record<CompareMode, string> = {
   development: "Entwicklung",
 };
 
-const modeDescriptions: Record<CompareMode, string> = {
-  comparison: "Leistungen innerhalb einer Altersklasse vergleichen.",
-  ranking: "Rangliste der Werte innerhalb einer Altersklasse (eines Testjahrs).",
-  development: "Entwicklung eines Jahrgangs über die Altersklassen hinweg vergleichen.",
-};
-
 export function ComparePage() {
   const [mode, setMode] = useState<CompareMode>("comparison");
 
@@ -30,9 +24,7 @@ export function ComparePage() {
   return (
     <>
       <header className="mb-8">
-        <p className="text-sm font-medium text-zinc-500">Vergleich</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">{modeLabels[mode]}</h1>
-        <p className="mt-2 text-sm text-zinc-500">{modeDescriptions[mode]}</p>
+        <h1 className="text-3xl font-semibold tracking-tight">{modeLabels[mode]}</h1>
 
         <div className="mt-4 inline-flex rounded-lg border border-zinc-300 bg-white p-1">
           {(Object.keys(modeLabels) as CompareMode[]).map((option) => (

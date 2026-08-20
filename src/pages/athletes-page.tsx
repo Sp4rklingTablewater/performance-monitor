@@ -16,8 +16,7 @@ export function AthletesPage() {
   return (
     <>
       <header className="mb-8">
-        <p className="text-sm font-medium text-zinc-500">Athlet:innen</p>
-        <div className="mt-2 flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           <h1 className="text-3xl font-semibold tracking-tight">Athlet:innen</h1>
           <Link
             to="/athletes/new"

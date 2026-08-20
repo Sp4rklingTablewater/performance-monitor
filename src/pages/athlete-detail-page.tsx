@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { PerformanceLineChart } from "@/components/performance-line-chart";
 import { fetchParticipantById, fetchPerformanceTestsByParticipant, queryKeys } from "@/lib/data";
 import { formatTestDate } from "@/lib/format";
-import { computeJumpHeight } from "@/lib/metrics";
+import { computeJumpHeight, metricConfig } from "@/lib/metrics";
 import { NotFoundPage } from "@/pages/not-found-page";
 
 export function AthleteDetailPage() {
@@ -115,12 +115,7 @@ export function AthleteDetailPage() {
       </header>
 
       <section className="mb-10">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold">Entwicklung</h2>
-          <p className="mt-1 text-sm text-zinc-500">
-            Leistungsentwicklung über alle erfassten Testzeitpunkte.
-          </p>
-        </div>
+        <h2 className="mb-4 text-lg font-semibold">Entwicklung</h2>
 
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
           <PerformanceLineChart
@@ -128,30 +123,35 @@ export function AthleteDetailPage() {
             unit="cm"
             data={reachHeightData}
             betterDirection="higher"
+            decimals={metricConfig.reach_height.decimals}
           />
           <PerformanceLineChart
             title="Reichhöhe im Sprung"
             unit="cm"
             data={jumpReachData}
             betterDirection="higher"
+            decimals={metricConfig.jump_reach.decimals}
           />
           <PerformanceLineChart
             title="Sprung absolut"
             unit="cm"
             data={jumpHeightData}
             betterDirection="higher"
+            decimals={metricConfig.jump_height.decimals}
           />
           <PerformanceLineChart
             title="9-3-6-3-9"
             unit="s"
             data={sprintData}
             betterDirection="lower"
+            decimals={metricConfig.sprint_93639.decimals}
           />
           <PerformanceLineChart
             title="Ballkontrolle"
             unit=""
             data={ballControlData}
             betterDirection="higher"
+            decimals={metricConfig.ball_control.decimals}
           />
         </div>
       </section>

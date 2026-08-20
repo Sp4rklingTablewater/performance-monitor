@@ -156,36 +156,11 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
 
       {metric === "all" ? (
         <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
-          <ComparisonChart
-            metric="reach_height"
-            data={reachHeightData}
-            birthYear={birthYear}
-            ageGroup={ageGroup}
-          />
-          <ComparisonChart
-            metric="jump_reach"
-            data={jumpReachData}
-            birthYear={birthYear}
-            ageGroup={ageGroup}
-          />
-          <ComparisonChart
-            metric="jump_height"
-            data={jumpHeightData}
-            birthYear={birthYear}
-            ageGroup={ageGroup}
-          />
-          <ComparisonChart
-            metric="sprint_93639"
-            data={sprintData}
-            birthYear={birthYear}
-            ageGroup={ageGroup}
-          />
-          <ComparisonChart
-            metric="ball_control"
-            data={ballControlData}
-            birthYear={birthYear}
-            ageGroup={ageGroup}
-          />
+          <ComparisonChart metric="reach_height" data={reachHeightData} />
+          <ComparisonChart metric="jump_reach" data={jumpReachData} />
+          <ComparisonChart metric="jump_height" data={jumpHeightData} />
+          <ComparisonChart metric="sprint_93639" data={sprintData} />
+          <ComparisonChart metric="ball_control" data={ballControlData} />
         </div>
       ) : (
         <ComparisonChart
@@ -201,8 +176,6 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
                     ? sprintData
                     : ballControlData
           }
-          birthYear={birthYear}
-          ageGroup={ageGroup}
         />
       )}
     </div>

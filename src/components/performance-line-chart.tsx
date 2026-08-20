@@ -10,6 +10,8 @@ type PerformanceLineChartProps = {
   unit: string;
   data: ChartPoint[];
   betterDirection: "higher" | "lower";
+  /** Anzahl sinnvoller Nachkommastellen für Achsenbeschriftung/Tooltip. */
+  decimals?: number;
 };
 
 export function PerformanceLineChart({
@@ -17,8 +19,12 @@ export function PerformanceLineChart({
   unit,
   data,
   betterDirection,
+  decimals = 0,
 }: PerformanceLineChartProps) {
-  const values = data.map((point) => point.value);
+  // Nicht-finite Werte (z. B. NaN durch fehlerhafte Daten) würden Math.min/max
+  // vergiften und die gesamte Achse unbrauchbar machen – daher vorab entfernen.
+  const cleanData = data.filter((point) => Number.isFinite(point.value));
+  const values = cleanData.map((point) => point.value);
 
   const minValue = values.length > 0 ? Math.min(...values) : 0;
   const maxValue = values.length > 0 ? Math.max(...values) : 0;
@@ -39,7 +45,7 @@ export function PerformanceLineChart({
         </p>
       </div>
 
-      {data.length < 2 ? (
+      {cleanData.length < 2 ? (
         <div className="flex h-64 items-center justify-center text-sm text-zinc-500">
           Mindestens zwei Messungen für eine Entwicklung erforderlich.
         </div>
@@ -48,7 +54,7 @@ export function PerformanceLineChart({
           responsive
           width="100%"
           height={260}
-          data={data}
+          data={cleanData}
           margin={{
             top: 10,
             right: 15,
@@ -60,9 +66,18 @@ export function PerformanceLineChart({
 
           <XAxis dataKey="date" tickLine={false} axisLine={false} />
 
-          <YAxis domain={domain} tickLine={false} axisLine={false} width={45} unit={unit} />
+          <YAxis
+            domain={domain}
+            tickLine={false}
+            axisLine={false}
+            width={45}
+            unit={unit}
+            tickFormatter={(value) => Number(value).toFixed(decimals)}
+          />
 
-          <Tooltip formatter={(value) => [`${value} ${unit}`, title]} />
+          <Tooltip
+            formatter={(value) => [`${Number(value).toFixed(decimals)} ${unit}`, title]}
+          />
 
           <Line
             type="linear"

@@ -12,7 +12,7 @@ export type ComparisonMetric =
 
 export type DevelopmentMetric = Extract<
   ComparisonMetric,
-  "jump_height" | "sprint_93639" | "ball_control"
+  "reach_height" | "jump_reach" | "jump_height" | "sprint_93639" | "ball_control"
 >;
 
 export type ComparisonTest = Omit<PerformanceTest, "participant_id" | "notes" | "created_at"> & {

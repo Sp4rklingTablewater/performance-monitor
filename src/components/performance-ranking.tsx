@@ -74,7 +74,7 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
             <select
               value={year}
               onChange={(event) => setYear(event.target.value)}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className="h-10 w-full rounded-lg border border-zinc-300 px-3"
               disabled={availableYears.length === 0}
             >
               {availableYears.length === 0 ? (
@@ -102,7 +102,7 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
                 </button>
               ) : null}
             </div>
-            <div className="flex max-h-10.5 flex-wrap gap-1 overflow-y-auto rounded-lg border border-zinc-300 px-2 py-1.5">
+            <div className="h-10 flex flex-wrap gap-1 overflow-y-auto rounded-lg border border-zinc-300 px-2 py-1.5">
               {availableBirthYears.length === 0 ? (
                 <span className="py-0.5 text-sm text-zinc-400">Keine Jahrgänge vorhanden</span>
               ) : (
@@ -133,7 +133,7 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
             <select
               value={sortMetric}
               onChange={(event) => setSortMetric(event.target.value as ComparisonMetric)}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className="h-10 w-full rounded-lg border border-zinc-300 px-3"
             >
               {rankingMetrics.map((metric) => (
                 <option key={metric} value={metric}>
@@ -143,31 +143,25 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
             </select>
           </div>
 
-          <label className="flex items-end gap-2 pb-2">
-            <input
-              type="checkbox"
-              checked={showReferences}
-              onChange={(event) => setShowReferences(event.target.checked)}
-            />
-            <span className="text-sm font-medium">Referenzen anzeigen</span>
-          </label>
+          <div>
+            <span aria-hidden="true" className="mb-1 hidden text-sm font-medium xl:block">
+              &nbsp;
+            </span>
+            <label className="flex h-10 items-center gap-2 whitespace-nowrap">
+              <input
+                type="checkbox"
+                checked={showReferences}
+                onChange={(event) => setShowReferences(event.target.checked)}
+              />
+              <span className="text-sm font-medium">Referenzen anzeigen</span>
+            </label>
+          </div>
         </div>
       </section>
 
       <section className="rounded-xl border border-zinc-200 bg-white p-5">
         <div className="mb-6 flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold">Ranking</h2>
-            <p className="mt-1 text-sm text-zinc-500">
-              {year ? `Testjahr ${year}` : "kein Testjahr"}
-              {" · "}
-              {birthYears.length === 0
-                ? "Alle Jahrgänge"
-                : `Jahrgänge ${birthYears.slice().sort((a, b) => a - b).join(", ")}`}
-              {" · "}
-              Rang nach {metricConfig[sortMetric].label}
-            </p>
-          </div>
+          <h2 className="text-lg font-semibold">Ranking</h2>
 
           <div className="text-right">
             <p className="text-sm text-zinc-500">Athlet:innen</p>
@@ -248,6 +242,10 @@ export function PerformanceRanking({ tests }: PerformanceRankingProps) {
     </div>
   );
 }
+
+
+
+
 
 
 

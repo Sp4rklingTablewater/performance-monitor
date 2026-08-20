@@ -7,7 +7,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { metricConfig } from "@/lib/metrics";
+import { formatMetricValue, metricConfig } from "@/lib/metrics";
 import type { ComparisonMetric } from "@/lib/types";
 
 export type { ComparisonMetric };
@@ -26,8 +26,6 @@ export type ComparisonChartItem = {
 type ComparisonChartProps = {
   metric: ComparisonMetric;
   data: ComparisonChartItem[];
-  birthYear: string;
-  ageGroup: string;
 };
 
 function median(values: number[]): number | null {
@@ -45,10 +43,45 @@ function median(values: number[]): number | null {
   return sorted[middle];
 }
 
-export function ComparisonChart({ metric, data, birthYear, ageGroup }: ComparisonChartProps) {
+type ScatterTooltipProps = {
+  active?: boolean;
+  payload?: { payload: ComparisonChartItem }[];
+  metric: ComparisonMetric;
+};
+
+/**
+ * Recharts erzeugt für ScatterChart-Punkte zwei Tooltip-Einträge (X- und
+ * Y-Achse sind beide datengetrieben), was mit einem `formatter` zu einer
+ * doppelten Zeile führt. Ein eigener `content` zeigt stattdessen genau
+ * einen Eintrag pro Punkt, direkt aus den Originaldaten gelesen.
+ */
+function ScatterTooltip({ active, payload, metric }: ScatterTooltipProps) {
+  if (!active || !payload || payload.length === 0) {
+    return null;
+  }
+
+  const item = payload[0].payload;
   const config = metricConfig[metric];
 
-  const sortedData = [...data].sort((a, b) => {
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm">
+      <p className="font-medium">{item.label}</p>
+      <p className="text-zinc-500">
+        {formatMetricValue(item.value, metric)}
+        {config.unit ? ` ${config.unit}` : ""}
+      </p>
+    </div>
+  );
+}
+
+export function ComparisonChart({ metric, data }: ComparisonChartProps) {
+  const config = metricConfig[metric];
+
+  // Nicht-finite Werte (z. B. NaN durch fehlerhafte Daten) würden Math.min/max
+  // vergiften und die gesamte Achse unbrauchbar machen – daher vorab entfernen.
+  const cleanData = data.filter((item) => Number.isFinite(item.value));
+
+  const sortedData = [...cleanData].sort((a, b) => {
     if (config.betterDirection === "higher") {
       return b.value - a.value;
     }
@@ -79,10 +112,6 @@ export function ComparisonChart({ metric, data, birthYear, ageGroup }: Compariso
           <h2 className="text-lg font-semibold">{config.label}</h2>
 
           <p className="mt-1 text-sm text-zinc-500">
-            {birthYear === "all" ? "Alle Jahrgänge" : `Jahrgang ${birthYear}`}
-            {" · "}
-            {ageGroup}
-            {" · "}
             {config.betterDirection === "higher" ? "höher ist besser" : "niedriger ist besser"}
           </p>
         </div>
@@ -94,7 +123,7 @@ export function ComparisonChart({ metric, data, birthYear, ageGroup }: Compariso
 
           {medianValue !== null && (
             <p className="mt-1 text-sm text-zinc-500">
-              Median: {medianValue}
+              Median: {formatMetricValue(medianValue, metric)}
               {config.unit ? ` ${config.unit}` : ""}
             </p>
           )}
@@ -119,14 +148,17 @@ export function ComparisonChart({ metric, data, birthYear, ageGroup }: Compariso
         >
           <CartesianGrid horizontal={false} strokeDasharray="3 3" />
 
-          <XAxis type="number" dataKey="value" domain={domain} tickLine={false} />
+          <XAxis
+            type="number"
+            dataKey="value"
+            domain={domain}
+            tickLine={false}
+            tickFormatter={(value) => formatMetricValue(value, metric)}
+          />
 
           <YAxis type="category" dataKey="label" width={135} tickLine={false} axisLine={false} />
 
-          <Tooltip
-            cursor={{ strokeDasharray: "3 3" }}
-            formatter={(value) => [`${value}${config.unit ? ` ${config.unit}` : ""}`, config.label]}
-          />
+          <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<ScatterTooltip metric={metric} />} />
 
           {medianValue !== null && <ReferenceLine x={medianValue} strokeDasharray="4 4" />}
 

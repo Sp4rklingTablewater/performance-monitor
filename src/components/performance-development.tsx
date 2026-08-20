@@ -8,6 +8,8 @@ type PerformanceDevelopmentProps = {
 };
 
 const developmentMetricOptions: { value: DevelopmentMetric; label: string }[] = [
+  { value: "reach_height", label: "Reichhöhe im Stand" },
+  { value: "jump_reach", label: "Reichhöhe im Sprung" },
   { value: "jump_height", label: "Sprung absolut" },
   { value: "sprint_93639", label: "9-3-6-3-9" },
   { value: "ball_control", label: "Ballkontrolle" },
@@ -87,10 +89,11 @@ export function PerformanceDevelopment({ tests }: PerformanceDevelopmentProps) {
         metric={metric}
         points={points}
         series={series}
-        birthYear={birthYear}
         athleteCount={athleteCount}
       />
     </div>
   );
 }
+
+
 
