@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { BirthYearMultiSelect } from "@/components/birth-year-multi-select";
 import { ComparisonChart, type ComparisonChartItem } from "@/components/comparison-chart";
 import { ageGroupOrder, defaultAgeGroup } from "@/lib/constants";
 import { buildParticipantLabel, getComparisonMetricValue, metricConfig } from "@/lib/metrics";
@@ -14,12 +15,16 @@ type MetricFilter = "all" | ComparisonMetric;
 const comparisonMetrics = Object.keys(metricConfig) as ComparisonMetric[];
 
 export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
-  const [birthYear, setBirthYear] = useState("all");
+  const [birthYears, setBirthYears] = useState<number[]>([]);
   const [ageGroup, setAgeGroup] = useState(defaultAgeGroup);
   const [metric, setMetric] = useState<MetricFilter>("all");
   const [showReferences, setShowReferences] = useState(true);
 
-  const birthYears = useMemo(() => getAvailableBirthYears(tests), [tests]);
+  const availableBirthYears = useMemo(() => getAvailableBirthYears(tests), [tests]);
+
+  // Bei genau einem gewählten Jahrgang ist er für alle gezeigten Athlet:innen
+  // gleich und muss im Namen nicht wiederholt werden.
+  const showBirthYearInLabel = birthYears.length !== 1;
 
   const availableAgeGroups = useMemo(() => {
     const found = new Set(
@@ -44,7 +49,7 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
           return showReferences;
         }
 
-        if (birthYear !== "all" && test.participant.birth_year !== Number(birthYear)) {
+        if (birthYears.length > 0 && !birthYears.includes(test.participant.birth_year ?? -1)) {
           return false;
         }
 
@@ -58,7 +63,7 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
         }
 
         const label = buildParticipantLabel(test.participant, {
-          showBirthYear: birthYear === "all",
+          showBirthYear: showBirthYearInLabel,
         });
 
         return {
@@ -80,28 +85,18 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
         comparisonMetrics.map((metricKey) => [metricKey, getChartData(metricKey)]),
       ) as Record<ComparisonMetric, ComparisonChartItem[]>,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tests, ageGroup, birthYear, showReferences],
+    [tests, ageGroup, birthYears, showReferences],
   );
 
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-card-border bg-card p-5">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium">Jahrgang</label>
-            <select
-              value={birthYear}
-              onChange={(event) => setBirthYear(event.target.value)}
-              className="w-full rounded-lg border border-card-border px-3 py-2"
-            >
-              <option value="all">Alle Jahrgänge</option>
-              {birthYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
+          <BirthYearMultiSelect
+            availableYears={availableBirthYears}
+            selectedYears={birthYears}
+            onChange={setBirthYears}
+          />
 
           <div>
             <label className="mb-1 block text-sm font-medium">Altersklasse</label>
