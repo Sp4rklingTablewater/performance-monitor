@@ -91,7 +91,10 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
     [tests, ageGroup, birthYears, showReferences],
   );
 
-  const summaryData = useMemo(() => buildComparisonRadarData(dataByMetric), [dataByMetric]);
+  const summaryData = useMemo(
+    () => buildComparisonRadarData(tests, dataByMetric, ageGroup),
+    [tests, dataByMetric, ageGroup],
+  );
 
   return (
     <div className="space-y-6">

@@ -1,42 +1,86 @@
 import type { ComparisonChartItem } from "@/components/comparison-chart";
+import { computeAgeGroupStats } from "@/lib/age-group-stats";
 import { metricConfig } from "@/lib/metrics";
 import type { ProfileData, ProfilePoint, ProfileSeries } from "@/lib/profile";
-import type { ComparisonMetric } from "@/lib/types";
+import type { ComparisonMetric, ComparisonTest } from "@/lib/types";
 
 const comparisonMetrics = Object.keys(metricConfig) as ComparisonMetric[];
 
 /**
  * Kein Wert in der normierten Darstellung fällt unter diesen Radius (in %).
- * Reine Min-Max-Normierung würde den/die schlechteste:n Teilnehmer:in einer
- * Messgröße exakt auf 0 (Mittelpunkt) setzen – optisch nicht unterscheidbar
- * von einem fehlenden Wert. Mit einem Sockelradius bleibt „schlechtester
- * echter Wert in der Kohorte" immer als sichtbarer Achsenpunkt erkennbar.
+ * Bei extremen Z-Werten würde ein linearer 0–100-Bereich den schlechtesten
+ * Fall exakt auf 0 (Mittelpunkt) setzen – optisch nicht unterscheidbar von
+ * einem fehlenden Wert. Mit einem Sockelradius bleibt auch eine sehr
+ * unterdurchschnittliche Leistung immer als sichtbarer Achsenpunkt erkennbar.
  */
 const MIN_RADIUS_PERCENT = 12;
 
 /**
+ * Z-Werte jenseits dieser Grenze werden gekappt, bevor sie auf den Radius
+ * gemappt werden. ±2.5 Standardabweichungen decken bereits >98 % einer
+ * normalverteilten Population ab – darüber hinausgehende Ausreißer würden
+ * sonst die gesamte restliche Kohorte optisch in die Mitte stauchen.
+ */
+const Z_CLAMP = 2.5;
+
+/** Mappt einen (bereits vorzeichen-korrigierten) Z-Wert auf einen Radius zwischen `MIN_RADIUS_PERCENT` und 100. */
+function zToRadiusPercent(z: number): number {
+  const clamped = Math.max(-Z_CLAMP, Math.min(Z_CLAMP, z));
+  const relative = (clamped + Z_CLAMP) / (2 * Z_CLAMP);
+
+  return MIN_RADIUS_PERCENT + relative * (100 - MIN_RADIUS_PERCENT);
+}
+
+/**
+ * Radius des Populationsdurchschnitts (Z = 0). Wegen `MIN_RADIUS_PERCENT`
+ * liegt das NICHT bei 50 %, sondern in der Mitte zwischen Sockel und 100 %.
+ * Exportiert, damit `performance-radar-chart.tsx` einen sichtbaren
+ * Referenzring auf genau diesem Radius zeichnen kann – ohne den würde man
+ * unterdurchschnittliche Werte im Chart nicht von überdurchschnittlichen
+ * unterscheiden können.
+ */
+export const AVERAGE_RADIUS_PERCENT = zToRadiusPercent(0);
+
+/**
  * Baut aus den pro Messgröße gefilterten Vergleichsdaten (`dataByMetric`, wie
  * im Leistungsvergleich verwendet) die Datenstruktur für einen Profil-Radar
- * auf – eine Achse pro Messgröße, ein Polygon pro Person. Analog zu
- * `buildProfileData` wird jede Messgröße innerhalb der aktuell gezeigten
- * Kohorte auf `MIN_RADIUS_PERCENT`–100 normiert (invertiert bei „niedriger
- * ist besser"), damit unterschiedliche Einheiten auf einer gemeinsamen Achse
- * darstellbar sind.
+ * auf – eine Achse pro Messgröße, ein Polygon pro Person.
+ *
+ * Jede Messgröße wird als Z-Index dargestellt (Standardabweichungen vom
+ * Mittelwert aller Athlet:innen dieser Altersklasse, alle Jahrgänge, ohne
+ * Referenzen – siehe `computeAgeGroupStats`, dieselbe Population wie beim
+ * Normbereich im Entwicklungs-Chart und dem Z-Index-Panel auf der
+ * Athletenseite). Vorzeichen bei „niedriger ist besser" gedreht, damit
+ * „weiter außen" auf jeder Achse immer „besser" bedeutet.
+ *
+ * Das ist bewusst KEINE Min-Max-Normierung innerhalb der aktuell gefilterten
+ * Kohorte: Bei wenigen sichtbaren Personen würde eine Min-Max-Skala immer
+ * jemanden auf 100 % und jemanden auf den Sockel ziehen, selbst wenn die
+ * echten Unterschiede winzig sind – und "80 %" hätte je nach Filter (Jahrgang,
+ * Referenzen an/aus) jedes Mal eine andere Bedeutung. Mit einer festen
+ * Populations-Referenz bleibt die Polygon-Größe dagegen tatsächlich
+ * aussagekräftig: klein heißt nah am Durchschnitt, groß heißt wirklich
+ * überdurchschnittlich – unabhängig davon, wer gerade mitverglichen wird.
  *
  * Recharts setzt den Radius eines Radar-Punkts bei fehlendem Wert auf 0
  * (Mittelpunkt) statt die Achse auszulassen – bei Personen mit nur teilweise
  * vorhandenen Messgrößen würde das Polygon dadurch zu einem spitzen Dreieck
  * statt einem Fünfeck kollabieren. Deshalb werden nur Personen mit einem
- * Wert für **alle** Messgrößen normiert und dargestellt; alle anderen fließen
- * weder in die Normierung noch ins Chart ein und werden über
- * `incompleteCount` gezählt.
+ * Wert für **alle** Messgrößen dargestellt; alle anderen fließen weder in die
+ * Normierung noch ins Chart ein und werden über `incompleteCount` gezählt.
  */
 export function buildComparisonRadarData(
+  tests: ComparisonTest[],
   dataByMetric: Record<ComparisonMetric, ComparisonChartItem[]>,
+  ageGroup: string,
 ): ProfileData {
   const rawValuesByParticipant = new Map<
     string,
-    { label: string; participantType: "athlete" | "reference"; values: Partial<Record<ComparisonMetric, number>> }
+    {
+      label: string;
+      participantType: "athlete" | "reference";
+      values: Partial<Record<ComparisonMetric, number>>;
+    }
   >();
 
   for (const metricKey of comparisonMetrics) {
@@ -54,36 +98,43 @@ export function buildComparisonRadarData(
 
   const completeParticipantIds = new Set(
     Array.from(rawValuesByParticipant.entries())
-      .filter(([, entry]) => comparisonMetrics.every((metricKey) => entry.values[metricKey] !== undefined))
+      .filter(([, entry]) =>
+        comparisonMetrics.every((metricKey) => entry.values[metricKey] !== undefined),
+      )
       .map(([participantId]) => participantId),
   );
 
   const incompleteCount = rawValuesByParticipant.size - completeParticipantIds.size;
 
   const points: ProfilePoint[] = comparisonMetrics.map((metricKey) => {
-    const items = dataByMetric[metricKey].filter((item) => completeParticipantIds.has(item.participantId));
+    const items = dataByMetric[metricKey].filter((item) =>
+      completeParticipantIds.has(item.participantId),
+    );
     const config = metricConfig[metricKey];
+    const stats = computeAgeGroupStats(tests, metricKey).get(ageGroup);
 
-    const values = items.map((item) => item.value);
-    const minValue = values.length > 0 ? Math.min(...values) : 0;
-    const maxValue = values.length > 0 ? Math.max(...values) : 0;
-    const range = maxValue - minValue;
-
-    const point: ProfilePoint = { metric: config.label, metricKey };
+    // "average" ist ein reservierter Schlüssel (siehe `AVERAGE_RADIUS_PERCENT`)
+    // für den Referenzring des Populationsdurchschnitts, kein Teilnehmer:in.
+    const point: ProfilePoint = {
+      metric: config.label,
+      metricKey,
+      average: AVERAGE_RADIUS_PERCENT,
+    };
 
     for (const item of items) {
-      const relativeScore =
-        range === 0
-          ? 100
-          : config.betterDirection === "higher"
-            ? ((item.value - minValue) / range) * 100
-            : ((maxValue - item.value) / range) * 100;
+      if (!stats || stats.std === 0) {
+        // Population zu klein für eine aussagekräftige Std.-Abw. (z. B.
+        // weniger als 2 Athlet:innen dieser Altersklasse) – neutralen
+        // Mittelwert-Radius zeigen, statt eine nicht belastbare Kennzahl
+        // vorzutäuschen.
+        point[item.participantId] = 50;
+        continue;
+      }
 
-      // Auf MIN_RADIUS_PERCENT–100 stauchen, statt 0–100 zu nutzen, damit
-      // selbst der schlechteste echte Wert noch als Punkt auf der Achse
-      // sichtbar bleibt und nicht mit einem fehlenden Wert verwechselt wird.
-      point[item.participantId] =
-        MIN_RADIUS_PERCENT + (relativeScore / 100) * (100 - MIN_RADIUS_PERCENT);
+      const rawZ = (item.value - stats.mean) / stats.std;
+      const z = config.betterDirection === "higher" ? rawZ : -rawZ;
+
+      point[item.participantId] = zToRadiusPercent(z);
     }
 
     return point;
@@ -106,8 +157,3 @@ export function buildComparisonRadarData(
 
   return { points, series, athleteCount, incompleteCount };
 }
-
-
-
-
-

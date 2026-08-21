@@ -3,13 +3,14 @@ import type { ComparisonMetric } from "@/lib/types";
 /**
  * Gemeinsame Datenstruktur für den Profil-Radar-Chart (siehe
  * `performance-radar-chart.tsx`): eine Achse pro Messgröße, ein Polygon pro
- * Teilnehmer:in. Wird sowohl im Leistungsvergleich (`comparison-summary.ts`,
- * gefiltert nach Altersklasse) als auch potenziell für weitere
- * Radar-Ansichten verwendet.
+ * Teilnehmer:in. Wird im Leistungsvergleich befüllt (`comparison-summary.ts`,
+ * Z-Index je Altersklasse, siehe dort für Details zur Normierung).
  */
 export type ProfilePoint = {
   metric: string;
   metricKey: ComparisonMetric;
+  /** Reservierter Schlüssel für den Referenzring des Populationsdurchschnitts (siehe `AVERAGE_RADIUS_PERCENT`), kein Teilnehmer:in. */
+  average: number;
   [participantId: string]: number | string | null;
 };
 
@@ -33,5 +34,3 @@ export type ProfileData = {
    */
   incompleteCount: number;
 };
-
-

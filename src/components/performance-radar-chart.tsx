@@ -1,15 +1,8 @@
-import {
-  Legend,
-  PolarAngleAxis,
-  PolarGrid,
-  PolarRadiusAxis,
-  Radar,
-  RadarChart,
-  Tooltip,
-} from "recharts";
+import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, Tooltip } from "recharts";
 import type { ProfilePoint, ProfileSeries } from "@/lib/profile";
 import { formatMetricValue, metricConfig } from "@/lib/metrics";
 import { getSeriesColor } from "@/lib/series-colors";
+import { ChartLegend } from "@/components/chart-legend";
 
 type PerformanceRadarChartProps = {
   points: ProfilePoint[];
@@ -37,12 +30,16 @@ function RadarTooltip({ active, payload, series }: RadarTooltipProps) {
 
   const metricKey = payload[0].payload.metricKey;
   const config = metricConfig[metricKey];
+  // "average" ist der Referenzring (Populationsdurchschnitt), keine Person –
+  // dafür gibt es keinen sinnvollen Rohwert, daher hier ausblenden statt
+  // fälschlich "average: kein Wert" anzuzeigen.
+  const personEntries = payload.filter((entry) => entry.dataKey !== "average");
 
   return (
     <div className="rounded-lg border border-header bg-header px-3 py-2 text-sm text-white shadow-sm">
       <p className="mb-1 font-medium">{config.label}</p>
 
-      {payload.map((entry) => {
+      {personEntries.map((entry) => {
         const person = series.find((item) => item.id === entry.dataKey);
         const rawValue = person?.rawValues[metricKey];
 
@@ -76,10 +73,6 @@ export function PerformanceRadarChart({
         <div>
           <h2 className="text-lg font-semibold">Profil</h2>
 
-          <p className="mt-1 text-sm text-foreground/60">
-            Alle Messgrößen zu einem Testzeitpunkt, normiert auf 0–100 (weiter außen = besser)
-          </p>
-
           {incompleteCount > 0 ? (
             <p className="mt-1 text-sm text-foreground/50">
               {incompleteCount === 1
@@ -100,39 +93,54 @@ export function PerformanceRadarChart({
           Für diese Auswahl liegen keine Werte vor.
         </div>
       ) : (
-        <RadarChart responsive width="100%" height={420} data={points} outerRadius="75%">
-          <PolarGrid stroke="var(--color-card-border)" />
+        <>
+          <RadarChart responsive width="100%" height={420} data={points} outerRadius="75%">
+            <PolarGrid stroke="var(--color-card-border)" />
 
-          <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12 }} />
+            <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12 }} />
 
-          <PolarRadiusAxis
-            domain={[0, 100]}
-            tick={false}
-            axisLine={false}
-            tickCount={5}
-          />
+            <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} tickCount={5} />
 
-          <Tooltip content={<RadarTooltip series={series} />} />
+            <Tooltip content={<RadarTooltip series={series} />} />
 
-          <Legend />
-
-          {series.map((item, index) => (
+            {/* Referenzring beim Populationsdurchschnitt (Z = 0): ohne diesen
+                lässt sich im Chart nicht erkennen, ob ein Wert über- oder
+                unterdurchschnittlich ist – siehe AVERAGE_RADIUS_PERCENT in
+                comparison-summary.ts. Zuerst gerendert, damit die echten
+                Personen-Polygone darüber liegen. */}
             <Radar
-              key={item.id}
-              dataKey={item.id}
-              name={item.label}
-              stroke={getSeriesColor(index)}
-              fill={getSeriesColor(index)}
-              fillOpacity={0.12}
-              strokeWidth={2}
-              strokeDasharray={item.participantType === "reference" ? "5 4" : undefined}
-              connectNulls={false}
+              dataKey="average"
+              name="Ø aller Athlet:innen"
+              stroke="var(--color-foreground)"
+              strokeOpacity={0.4}
+              strokeWidth={1.5}
+              strokeDasharray="4 3"
+              fill="none"
+              dot={false}
+              isAnimationActive={false}
             />
-          ))}
-        </RadarChart>
+
+            {series.map((item, index) => (
+              <Radar
+                key={item.id}
+                dataKey={item.id}
+                name={item.label}
+                stroke={getSeriesColor(index)}
+                fill={getSeriesColor(index)}
+                fillOpacity={0.12}
+                strokeWidth={2}
+                strokeDasharray={item.participantType === "reference" ? "5 4" : undefined}
+                connectNulls={false}
+              />
+            ))}
+          </RadarChart>
+
+          <ChartLegend
+            series={series}
+            referenceLine={{ label: "Ø aller Athlet:innen", color: "var(--color-foreground)" }}
+          />
+        </>
       )}
     </section>
   );
 }
-
-

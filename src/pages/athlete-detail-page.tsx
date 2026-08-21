@@ -2,9 +2,16 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { PerformanceLineChart } from "@/components/performance-line-chart";
-import { fetchParticipantById, fetchPerformanceTestsByParticipant, queryKeys } from "@/lib/data";
+import { ZIndexChart } from "@/components/z-index-chart";
+import {
+  fetchComparisonTests,
+  fetchParticipantById,
+  fetchPerformanceTestsByParticipant,
+  queryKeys,
+} from "@/lib/data";
 import { formatTestDate } from "@/lib/format";
 import { computeJumpHeight, metricConfig } from "@/lib/metrics";
+import { buildZIndexData } from "@/lib/z-index";
 import { NotFoundPage } from "@/pages/not-found-page";
 
 export function AthleteDetailPage() {
@@ -19,6 +26,16 @@ export function AthleteDetailPage() {
   const testsQuery = useQuery({
     queryKey: queryKeys.performanceTestsByParticipant(id ?? ""),
     queryFn: () => fetchPerformanceTestsByParticipant(id ?? ""),
+    enabled: !!id && !!participantQuery.data,
+  });
+
+  // Für den Z-Index (6. Panel) wird die Vergleichspopulation aller
+  // Athlet:innen benötigt (Mittelwert/Std.-Abw. je Altersklasse), nicht nur
+  // die Tests dieser einen Person. `queryKeys.comparison` teilt den Cache mit
+  // der Vergleichsseite, dadurch meist kein zusätzlicher Request nötig.
+  const comparisonQuery = useQuery({
+    queryKey: queryKeys.comparison,
+    queryFn: fetchComparisonTests,
     enabled: !!id && !!participantQuery.data,
   });
 
@@ -62,6 +79,11 @@ export function AthleteDetailPage() {
       date: formatTestDate(test.test_date),
       value: test.ball_control_count as number,
     }));
+
+  const zIndexData = useMemo(
+    () => (id ? buildZIndexData(comparisonQuery.data ?? [], id) : { points: [], series: [] }),
+    [comparisonQuery.data, id],
+  );
 
   if (participantQuery.isPending || testsQuery.isPending) {
     return <p className="text-sm text-foreground/60">Lade Athlet:in...</p>;
@@ -160,6 +182,7 @@ export function AthleteDetailPage() {
             betterDirection="higher"
             decimals={metricConfig.ball_control.decimals}
           />
+          <ZIndexChart points={zIndexData.points} series={zIndexData.series} />
         </div>
       </section>
 

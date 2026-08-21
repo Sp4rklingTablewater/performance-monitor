@@ -1,10 +1,26 @@
 import { ageGroupOrder } from "@/lib/constants";
+import { computeAgeGroupStats } from "@/lib/age-group-stats";
 import { buildParticipantLabel, getComparisonMetricValue } from "@/lib/metrics";
 import type { ComparisonTest, DevelopmentMetric } from "@/lib/types";
 
 /** Ein Datenpunkt pro Altersklasse. `ageGroup` ist die X-Achsen-Kategorie,
+ * `norm*`-Felder beschreiben den Normbereich dieser Altersklasse,
  * alle weiteren Felder sind Werte einzelner Teilnehmer:innen (Schlüssel = participant.id). */
-export type DevelopmentPoint = { ageGroup: string; [participantId: string]: number | string };
+export type DevelopmentPoint = {
+  ageGroup: string;
+  /**
+   * [Mittelwert − Std.-Abw., Mittelwert + Std.-Abw.] aller Athlet:innen-Tests
+   * dieser Altersklasse, unabhängig von Filtern. Immer ein Array (nie
+   * `undefined`) – bei zu wenig Stichprobe `[0, 0]` als unsichtbarer
+   * Platzhalter, damit Recharts die gesamte Serie konsistent als
+   * Bereichs-Fläche erkennt (siehe `hasNorm` für die tatsächliche
+   * Verfügbarkeit).
+   */
+  normRange: [number, number];
+  /** `true`, wenn `normRange` auf echten Werten beruht (mind. 2 Athlet:innen). */
+  hasNorm: boolean;
+  [participantId: string]: number | string | boolean | [number, number] | undefined;
+};
 
 export type DevelopmentSeries = {
   id: string;
@@ -32,6 +48,15 @@ type BuildDevelopmentDataOptions = {
  * Fehlende Tests werden nicht künstlich aufgefüllt – der Chart überspringt
  * sie stattdessen beim Zeichnen der Linie (siehe `connectNulls` in
  * `development-chart.tsx`), statt einen erfundenen Wert einzusetzen.
+ *
+ * Zusätzlich wird pro Altersklasse ein Normbereich (Ø ± Std.-Abw.) berechnet.
+ * Der bezieht sich bewusst auf **alle** Athlet:innen-Tests dieser Altersklasse
+ * über alle Jahrgänge/Kalenderjahre hinweg – unabhängig vom aktuell gewählten
+ * Jahrgangs-Filter und ohne Referenzpersonen (die sind ein Ziel-Maßstab,
+ * keine Norm für Jugendliche). So bleibt der Normbereich eine stabile
+ * Vergleichsgröße: Ein einzelner schwacher oder starker Jahrgang verschiebt
+ * nicht seine eigene Referenz, und die Stichprobe ist größer/stabiler als
+ * bei nur einem Jahrgang.
  */
 export function buildDevelopmentData(
   tests: ComparisonTest[],
@@ -47,6 +72,11 @@ export function buildDevelopmentData(
     string,
     { label: string; participantType: "athlete" | "reference"; values: Map<string, number> }
   >();
+
+  // Populations-Statistik für den Normbereich: dieselbe Berechnung wie für
+  // den Z-Index-Chart auf der Athletenseite (siehe `age-group-stats.ts`),
+  // unabhängig von birthYears/showReferences.
+  const ageGroupStats = computeAgeGroupStats(tests, metric);
 
   for (const test of tests) {
     if (!test.age_group || !validAgeGroups.has(test.age_group)) {
@@ -96,8 +126,17 @@ export function buildDevelopmentData(
   // Wert hat – so reicht die X-Achse nur so weit, wie tatsächlich Daten
   // vorliegen, statt immer die vollständige Alterklassen-Reihenfolge zu zeigen.
   const points: DevelopmentPoint[] = ageGroupOrder
+    .filter((ageGroup) =>
+      Array.from(participantEntries.values()).some((entry) => entry.values.has(ageGroup)),
+    )
     .map((ageGroup) => {
-      const point: DevelopmentPoint = { ageGroup };
+      const point: DevelopmentPoint = { ageGroup, normRange: [0, 0], hasNorm: false };
+      const stats = ageGroupStats.get(ageGroup);
+
+      if (stats) {
+        point.normRange = [stats.mean - stats.std, stats.mean + stats.std];
+        point.hasNorm = true;
+      }
 
       for (const [id, entry] of participantEntries) {
         const value = entry.values.get(ageGroup);
@@ -108,8 +147,7 @@ export function buildDevelopmentData(
       }
 
       return point;
-    })
-    .filter((point) => Object.keys(point).length > 1);
+    });
 
   const athleteCount = series.filter((item) => item.participantType === "athlete").length;
 
