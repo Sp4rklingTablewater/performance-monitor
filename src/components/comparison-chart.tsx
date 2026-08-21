@@ -125,6 +125,15 @@ export function ComparisonChart({ metric, data }: ComparisonChartProps) {
 
   const domain = computeChartDomain(values);
 
+  // Recharts benötigt für eine kategoriale Achse einen `dataKey` je Punkt.
+  // `label` ist NICHT garantiert eindeutig: Bei genau einem gewählten
+  // Jahrgang (siehe `buildComparisonChartData`) enthält es nur den Namen –
+  // zwei Athlet:innen mit demselben Vornamen würden sonst auf denselben
+  // Y-Achsen-Tick fallen und optisch zu einer Person verschmelzen.
+  // `participantId` ist dagegen immer eindeutig; die Anzeige-Beschriftung
+  // wird über `tickFormatter` aus den Originaldaten nachgeschlagen.
+  const labelByParticipantId = new Map(sortedData.map((item) => [item.participantId, item.label]));
+
   return (
     <section className="rounded-xl border border-card-border bg-card p-5">
       <div className="mb-6 flex items-start justify-between gap-4">
@@ -182,11 +191,14 @@ export function ComparisonChart({ metric, data }: ComparisonChartProps) {
 
           <YAxis
             type="category"
-            dataKey="label"
+            dataKey="participantId"
             width={135}
             tickLine={false}
             axisLine={false}
             reversed
+            tickFormatter={(participantId: string) =>
+              labelByParticipantId.get(participantId) ?? participantId
+            }
           />
 
           <Tooltip

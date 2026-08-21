@@ -1,6 +1,7 @@
 import { ageGroupOrder } from "@/lib/constants";
 import { computeAgeGroupStats } from "@/lib/age-group-stats";
 import { buildParticipantLabel, getComparisonMetricValue } from "@/lib/metrics";
+import { matchesParticipantFilter } from "@/lib/participant-filter";
 import type { ComparisonTest, DevelopmentMetric } from "@/lib/types";
 
 /** Ein Datenpunkt pro Altersklasse. `ageGroup` ist die X-Achsen-Kategorie,
@@ -84,17 +85,8 @@ export function buildDevelopmentData(
     }
 
     const participant = test.participant;
-    const isReference = participant.participant_type === "reference";
 
-    if (isReference && !showReferences) {
-      continue;
-    }
-
-    if (
-      !isReference &&
-      birthYears.length > 0 &&
-      (participant.birth_year === null || !birthYears.includes(participant.birth_year))
-    ) {
+    if (!matchesParticipantFilter(participant, { birthYears, showReferences })) {
       continue;
     }
 

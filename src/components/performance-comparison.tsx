@@ -3,8 +3,9 @@ import { BirthYearMultiSelect } from "@/components/birth-year-multi-select";
 import { ComparisonChart, type ComparisonChartItem } from "@/components/comparison-chart";
 import { PerformanceRadarChart } from "@/components/performance-radar-chart";
 import { ageGroupOrder, defaultAgeGroup } from "@/lib/constants";
+import { buildComparisonChartData } from "@/lib/comparison-chart-data";
 import { buildComparisonRadarData } from "@/lib/comparison-summary";
-import { buildParticipantLabel, getComparisonMetricValue, metricConfig } from "@/lib/metrics";
+import { metricConfig } from "@/lib/metrics";
 import { getAvailableBirthYears } from "@/lib/ranking";
 import type { ComparisonMetric, ComparisonTest } from "@/lib/types";
 
@@ -24,10 +25,6 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
 
   const availableBirthYears = useMemo(() => getAvailableBirthYears(tests), [tests]);
 
-  // Bei genau einem gewählten Jahrgang ist er für alle gezeigten Athlet:innen
-  // gleich und muss im Namen nicht wiederholt werden.
-  const showBirthYearInLabel = birthYears.length !== 1;
-
   const availableAgeGroups = useMemo(() => {
     const found = new Set(
       tests
@@ -38,56 +35,14 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
     return ageGroupOrder.filter((group) => found.has(group));
   }, [tests]);
 
-  function getChartData(selectedMetric: ComparisonMetric): ComparisonChartItem[] {
-    return tests
-      .filter((test) => {
-        if (test.age_group !== ageGroup) {
-          return false;
-        }
-
-        const isReference = test.participant.participant_type === "reference";
-
-        if (isReference) {
-          return showReferences;
-        }
-
-        if (birthYears.length > 0 && !birthYears.includes(test.participant.birth_year ?? -1)) {
-          return false;
-        }
-
-        return true;
-      })
-      .map((test) => {
-        const value = getComparisonMetricValue(test, selectedMetric);
-
-        if (value === null) {
-          return null;
-        }
-
-        const label = buildParticipantLabel(test.participant, {
-          showBirthYear: showBirthYearInLabel,
-        });
-
-        return {
-          id: test.id,
-          participantId: test.participant.id,
-          label,
-          name: test.participant.name,
-          birthYear: test.participant.birth_year,
-          participantType: test.participant.participant_type,
-          testDate: test.test_date,
-          value,
-        };
-      })
-      .filter((item): item is ComparisonChartItem => item !== null);
-  }
-
   const dataByMetric = useMemo(
     () =>
       Object.fromEntries(
-        comparisonMetrics.map((metricKey) => [metricKey, getChartData(metricKey)]),
+        comparisonMetrics.map((metricKey) => [
+          metricKey,
+          buildComparisonChartData(tests, { metric: metricKey, ageGroup, birthYears, showReferences }),
+        ]),
       ) as Record<ComparisonMetric, ComparisonChartItem[]>,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [tests, ageGroup, birthYears, showReferences],
   );
 

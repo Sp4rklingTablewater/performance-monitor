@@ -1,4 +1,5 @@
 import { getComparisonMetricValue, metricConfig } from "@/lib/metrics";
+import { matchesParticipantFilter } from "@/lib/participant-filter";
 import type { ComparisonMetric, ComparisonTest } from "@/lib/types";
 
 export const rankingMetrics = Object.keys(metricConfig) as ComparisonMetric[];
@@ -97,22 +98,9 @@ export function buildRankingTable(
 ): RankingRow[] {
   const selectedYear = Number(year);
 
-  const filteredTests = tests.filter((test) => {
-    const isReference = test.participant.participant_type === "reference";
-
-    if (isReference) {
-      return showReferences;
-    }
-
-    if (
-      birthYears.length > 0 &&
-      (test.participant.birth_year === null || !birthYears.includes(test.participant.birth_year))
-    ) {
-      return false;
-    }
-
-    return true;
-  });
+  const filteredTests = tests.filter((test) =>
+    matchesParticipantFilter(test.participant, { birthYears, showReferences }),
+  );
 
   const testsByParticipant = new Map<string, ComparisonTest[]>();
 
