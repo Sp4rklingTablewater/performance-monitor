@@ -25,6 +25,13 @@ export type ProfileData = {
   points: ProfilePoint[];
   series: ProfileSeries[];
   athleteCount: number;
+  /**
+   * Anzahl Personen, die zwar in mindestens einer Messgröße einen Wert
+   * hatten, aber nicht in allen – sie werden nicht im Radar dargestellt, da
+   * fehlende Achsen sonst als Wert 0 (Mittelpunkt) interpretiert würden und
+   * das Polygon zu einem spitzen Dreieck statt einem Fünfeck verzerren.
+   */
+  incompleteCount: number;
 };
 
 

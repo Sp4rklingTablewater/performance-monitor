@@ -27,6 +27,8 @@ type PerformanceRadarChartProps = {
   points: ProfilePoint[];
   series: ProfileSeries[];
   athleteCount: number;
+  /** Anzahl Personen mit unvollständigen Werten, die deshalb nicht im Radar auftauchen. */
+  incompleteCount: number;
 };
 
 type RadarTooltipProps = {
@@ -74,7 +76,12 @@ function RadarTooltip({ active, payload, series }: RadarTooltipProps) {
   );
 }
 
-export function PerformanceRadarChart({ points, series, athleteCount }: PerformanceRadarChartProps) {
+export function PerformanceRadarChart({
+  points,
+  series,
+  athleteCount,
+  incompleteCount,
+}: PerformanceRadarChartProps) {
   return (
     <section className="rounded-xl border border-card-border bg-card p-5">
       <div className="mb-6 flex items-start justify-between gap-4">
@@ -84,6 +91,14 @@ export function PerformanceRadarChart({ points, series, athleteCount }: Performa
           <p className="mt-1 text-sm text-foreground/60">
             Alle Messgrößen zu einem Testzeitpunkt, normiert auf 0–100 (weiter außen = besser)
           </p>
+
+          {incompleteCount > 0 ? (
+            <p className="mt-1 text-sm text-foreground/50">
+              {incompleteCount === 1
+                ? "1 Person hat nicht für alle Messgrößen Werte und wird hier nicht angezeigt."
+                : `${incompleteCount} Personen haben nicht für alle Messgrößen Werte und werden hier nicht angezeigt.`}
+            </p>
+          ) : null}
         </div>
 
         <div className="text-right">

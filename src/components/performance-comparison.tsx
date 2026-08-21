@@ -151,6 +151,7 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
             points={summaryData.points}
             series={summaryData.series}
             athleteCount={summaryData.athleteCount}
+            incompleteCount={summaryData.incompleteCount}
           />
 
           <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
