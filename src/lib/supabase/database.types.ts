@@ -1,5 +1,17 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
+/**
+ * Hier von Hand gepflegter Ersatz für die per `supabase gen types` erzeugte
+ * Datei (kein lokales Supabase in dieser Umgebung verfügbar). WICHTIG:
+ * `@supabase/supabase-js` (>=2.x, `postgrest-js`) verlangt für jede Tabelle
+ * zwingend ein `Relationships`-Feld (siehe `GenericTable` in
+ * `postgrest-js/src/types/common/common.ts`). Fehlt es, erfüllt
+ * `Database["public"]` nicht mehr `GenericSchema` – `SupabaseClient` fällt
+ * dann intern komplett auf `never` zurück (siehe generische Constraints in
+ * `SupabaseClient.ts`), was genau die "Property X does not exist on type
+ * never"-Fehler in `data.ts`/`mutations.ts` verursacht. Ohne modellierte
+ * Fremdschlüssel-Beziehungen ist `Relationships: []` (leeres Array) korrekt.
+ */
 export type Database = {
   public: {
     Enums: {
@@ -31,6 +43,7 @@ export type Database = {
           active?: boolean;
           created_at?: string;
         };
+        Relationships: [];
       };
       performance_tests: {
         Row: {
@@ -69,6 +82,7 @@ export type Database = {
           notes?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

@@ -71,7 +71,7 @@ export function PerformanceRadarChart({
     <section className="rounded-xl border border-card-border bg-card p-5">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold">Profil</h2>
+          <h2 className="text-lg font-semibold">Leistungsstruktur</h2>
 
           {incompleteCount > 0 ? (
             <p className="mt-1 text-sm text-foreground/50">

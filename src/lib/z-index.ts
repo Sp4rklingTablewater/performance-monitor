@@ -22,6 +22,8 @@ export type ZIndexPoint = {
 export type ZIndexSeries = {
   id: ComparisonMetric;
   label: string;
+  /** Disziplinen haben keine Athlet/Referenz-Unterscheidung – siehe `ChartLegendSeries`. */
+  participantType?: undefined;
 };
 
 export type ZIndexData = {

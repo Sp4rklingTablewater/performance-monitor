@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
+import type { Database } from "@/lib/supabase/database.types";
 import type { ComparisonTest, Participant, PerformanceTest } from "@/lib/types";
 
 export const queryKeys = {
@@ -123,9 +124,23 @@ export async function fetchPerformanceTest(
 }
 
 export async function fetchComparisonTests(): Promise<ComparisonTest[]> {
+  // `postgrest-js` leitet die Form von Embeds (Einzelobjekt vs. Array)
+  // automatisch aus den `Relationships`-Metadaten in `database.types.ts` ab.
+  // Da diese Datei von Hand statt per `supabase gen types` gepflegt wird
+  // (kein lokales Supabase in dieser Umgebung), sind dort keine echten
+  // Fremdschlüssel-Metadaten hinterlegt – die Auto-Inferenz würde daher
+  // fälschlich einen Fehlertyp statt `participants` liefern. `.select<...>`
+  // erlaubt es, das Ergebnis stattdessen explizit zu typisieren: Durch
+  // `!inner` und die 1:n-Beziehung `performance_tests.participant_id ->
+  // participants.id` liefert Postgrest hier immer genau ein Objekt, kein
+  // Array.
+  type Row = Database["public"]["Tables"]["performance_tests"]["Row"] & {
+    participants: Pick<Participant, "id" | "name" | "birth_year" | "participant_type" | "active">;
+  };
+
   const { data, error } = await supabase
     .from("performance_tests")
-    .select(
+    .select<string, Row>(
       `
       id,
       participant_id,
@@ -155,7 +170,7 @@ export async function fetchComparisonTests(): Promise<ComparisonTest[]> {
 
   return (data ?? [])
     .map((row) => {
-      const participant = Array.isArray(row.participants) ? row.participants[0] : row.participants;
+      const participant = row.participants;
 
       if (!participant) {
         return null;
@@ -163,15 +178,12 @@ export async function fetchComparisonTests(): Promise<ComparisonTest[]> {
 
       return {
         id: row.id,
-        participant_id: row.participant_id,
         test_date: row.test_date,
         age_group: row.age_group,
         reach_height_cm: row.reach_height_cm,
         jump_reach_cm: row.jump_reach_cm,
         sprint_93639_seconds: row.sprint_93639_seconds,
         ball_control_count: row.ball_control_count,
-        notes: row.notes,
-        created_at: row.created_at,
         participant,
       } satisfies ComparisonTest;
     })

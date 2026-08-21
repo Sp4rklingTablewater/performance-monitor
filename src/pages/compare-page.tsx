@@ -1,21 +1,26 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PerformanceComparison } from "@/components/performance-comparison";
 import { PerformanceDevelopment } from "@/components/performance-development";
 import { PerformanceRanking } from "@/components/performance-ranking";
 import { fetchComparisonTests, queryKeys } from "@/lib/data";
+import { compareModes, type CompareMode } from "@/lib/compare-modes";
 
-type CompareMode = "comparison" | "ranking" | "development";
+const modeLabels = Object.fromEntries(
+  compareModes.map((item) => [item.mode, item.label]),
+) as Record<CompareMode, string>;
 
-const modeLabels: Record<CompareMode, string> = {
-  comparison: "Leistungsvergleich",
-  ranking: "Ranking",
-  development: "Entwicklung",
+type ComparePageProps = {
+  mode: CompareMode;
 };
 
-export function ComparePage() {
-  const [mode, setMode] = useState<CompareMode>("comparison");
-
+/**
+ * Die Unteransichten sind eigene Sidebar-Einträge (siehe `AppShell`) statt
+ * eines Segmented Controls im Content-Bereich, jeweils eine echte Route
+ * (`/compare`, `/compare/ranking`, `/compare/development`) statt internem
+ * State – dadurch bleibt die Auswahl in der URL, per Vor-/Zurück erreichbar,
+ * und diese Seite muss nur noch den zur Route passenden Modus rendern.
+ */
+export function ComparePage({ mode }: ComparePageProps) {
   const { data, isPending, isError, error } = useQuery({
     queryKey: queryKeys.comparison,
     queryFn: fetchComparisonTests,
@@ -25,23 +30,6 @@ export function ComparePage() {
     <>
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight">{modeLabels[mode]}</h1>
-
-        <div className="mt-4 inline-flex rounded-lg border border-card-border bg-card p-1">
-          {(Object.keys(modeLabels) as CompareMode[]).map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => setMode(option)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                mode === option
-                  ? "bg-primary text-white"
-                  : "text-foreground/70 hover:bg-card-border/40"
-              }`}
-            >
-              {modeLabels[option]}
-            </button>
-          ))}
-        </div>
       </header>
 
       {isPending ? <p className="text-sm text-foreground/60">Lade Vergleichsdaten...</p> : null}
