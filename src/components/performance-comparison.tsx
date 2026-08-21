@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { BirthYearMultiSelect } from "@/components/birth-year-multi-select";
 import { ComparisonChart, type ComparisonChartItem } from "@/components/comparison-chart";
+import { PerformanceRadarChart } from "@/components/performance-radar-chart";
 import { ageGroupOrder, defaultAgeGroup } from "@/lib/constants";
+import { buildComparisonRadarData } from "@/lib/comparison-summary";
 import { buildParticipantLabel, getComparisonMetricValue, metricConfig } from "@/lib/metrics";
 import { getAvailableBirthYears } from "@/lib/ranking";
 import type { ComparisonMetric, ComparisonTest } from "@/lib/types";
@@ -68,6 +70,7 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
 
         return {
           id: test.id,
+          participantId: test.participant.id,
           label,
           name: test.participant.name,
           birthYear: test.participant.birth_year,
@@ -87,6 +90,8 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tests, ageGroup, birthYears, showReferences],
   );
+
+  const summaryData = useMemo(() => buildComparisonRadarData(dataByMetric), [dataByMetric]);
 
   return (
     <div className="space-y-6">
@@ -141,11 +146,19 @@ export function PerformanceComparison({ tests }: PerformanceComparisonProps) {
       </section>
 
       {metric === "all" ? (
-        <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
-          {comparisonMetrics.map((metricKey) => (
-            <ComparisonChart key={metricKey} metric={metricKey} data={dataByMetric[metricKey]} />
-          ))}
-        </div>
+        <>
+          <PerformanceRadarChart
+            points={summaryData.points}
+            series={summaryData.series}
+            athleteCount={summaryData.athleteCount}
+          />
+
+          <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
+            {comparisonMetrics.map((metricKey) => (
+              <ComparisonChart key={metricKey} metric={metricKey} data={dataByMetric[metricKey]} />
+            ))}
+          </div>
+        </>
       ) : (
         <ComparisonChart metric={metric} data={dataByMetric[metric]} />
       )}

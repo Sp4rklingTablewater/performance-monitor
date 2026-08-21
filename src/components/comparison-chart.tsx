@@ -15,6 +15,7 @@ export type { ComparisonMetric };
 
 export type ComparisonChartItem = {
   id: string;
+  participantId: string;
   label: string;
   name: string;
   birthYear: number | null;

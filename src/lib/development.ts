@@ -90,19 +90,24 @@ export function buildDevelopmentData(
     .map(([id, entry]) => ({ id, label: entry.label, participantType: entry.participantType }))
     .sort((a, b) => a.label.localeCompare(b.label, "de"));
 
-  const points: DevelopmentPoint[] = ageGroupOrder.map((ageGroup) => {
-    const point: DevelopmentPoint = { ageGroup };
+  // Nur Altersklassen aufnehmen, für die mindestens ein:e Teilnehmer:in einen
+  // Wert hat – so reicht die X-Achse nur so weit, wie tatsächlich Daten
+  // vorliegen, statt immer die vollständige Alterklassen-Reihenfolge zu zeigen.
+  const points: DevelopmentPoint[] = ageGroupOrder
+    .map((ageGroup) => {
+      const point: DevelopmentPoint = { ageGroup };
 
-    for (const [id, entry] of participantEntries) {
-      const value = entry.values.get(ageGroup);
+      for (const [id, entry] of participantEntries) {
+        const value = entry.values.get(ageGroup);
 
-      if (value !== undefined) {
-        point[id] = value;
+        if (value !== undefined) {
+          point[id] = value;
+        }
       }
-    }
 
-    return point;
-  });
+      return point;
+    })
+    .filter((point) => Object.keys(point).length > 1);
 
   const athleteCount = series.filter((item) => item.participantType === "athlete").length;
 
