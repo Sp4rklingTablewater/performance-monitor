@@ -10,9 +10,19 @@ import {
   queryKeys,
 } from "@/lib/data";
 import { formatTestDate } from "@/lib/format";
-import { computeJumpHeight, metricConfig } from "@/lib/metrics";
+import { buildMetricTimeSeries, computeJumpHeight, metricConfig } from "@/lib/metrics";
+import type { ComparisonMetric } from "@/lib/types";
 import { buildZIndexData } from "@/lib/z-index";
 import { NotFoundPage } from "@/pages/not-found-page";
+
+/**
+ * Reihenfolge der Entwicklungs-Charts (1 pro Messgröße + Z-Index als 6.
+ * Panel). `metricConfig` ist bereits die einzige Quelle für Label/Einheit/
+ * Richtung/Nachkommastellen jeder Messgröße (siehe `metrics.ts`) – hier wird
+ * sie direkt wiederverwendet, statt sie ein weiteres Mal (mit dem Risiko
+ * eines Copy-Paste-Fehlers, z. B. falsche Einheit) zu duplizieren.
+ */
+const developmentChartMetrics = Object.keys(metricConfig) as ComparisonMetric[];
 
 export function AthleteDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -51,34 +61,16 @@ export function AthleteDetailPage() {
     [testsWithJumpHeight],
   );
 
-  const reachHeightData = chronologicalTests
-    .filter((test) => test.reach_height_cm !== null)
-    .map((test) => ({ date: formatTestDate(test.test_date), value: Number(test.reach_height_cm) }));
-
-  const jumpReachData = chronologicalTests
-    .filter((test) => test.jump_reach_cm !== null)
-    .map((test) => ({ date: formatTestDate(test.test_date), value: Number(test.jump_reach_cm) }));
-
-  const jumpHeightData = chronologicalTests
-    .filter((test) => test.jumpHeight !== null)
-    .map((test) => ({
-      date: formatTestDate(test.test_date),
-      value: test.jumpHeight as number,
-    }));
-
-  const sprintData = chronologicalTests
-    .filter((test) => test.sprint_93639_seconds !== null)
-    .map((test) => ({
-      date: formatTestDate(test.test_date),
-      value: Number(test.sprint_93639_seconds),
-    }));
-
-  const ballControlData = chronologicalTests
-    .filter((test) => test.ball_control_count !== null)
-    .map((test) => ({
-      date: formatTestDate(test.test_date),
-      value: test.ball_control_count as number,
-    }));
+  const timeSeriesByMetric = useMemo(
+    () =>
+      Object.fromEntries(
+        developmentChartMetrics.map((metric) => [
+          metric,
+          buildMetricTimeSeries(chronologicalTests, metric, (test) => formatTestDate(test.test_date)),
+        ]),
+      ) as Record<ComparisonMetric, ReturnType<typeof buildMetricTimeSeries>>,
+    [chronologicalTests],
+  );
 
   const zIndexData = useMemo(
     () => (id ? buildZIndexData(comparisonQuery.data ?? [], id) : { points: [], series: [] }),
@@ -147,41 +139,20 @@ export function AthleteDetailPage() {
         <h2 className="mb-4 text-lg font-semibold">Entwicklung</h2>
 
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-          <PerformanceLineChart
-            title="Reichhöhe im Stand"
-            unit="cm"
-            data={reachHeightData}
-            betterDirection="higher"
-            decimals={metricConfig.reach_height.decimals}
-          />
-          <PerformanceLineChart
-            title="Reichhöhe im Sprung"
-            unit="cm"
-            data={jumpReachData}
-            betterDirection="higher"
-            decimals={metricConfig.jump_reach.decimals}
-          />
-          <PerformanceLineChart
-            title="Sprung absolut"
-            unit="cm"
-            data={jumpHeightData}
-            betterDirection="higher"
-            decimals={metricConfig.jump_height.decimals}
-          />
-          <PerformanceLineChart
-            title="9-3-6-3-9"
-            unit="s"
-            data={sprintData}
-            betterDirection="lower"
-            decimals={metricConfig.sprint_93639.decimals}
-          />
-          <PerformanceLineChart
-            title="Ballkontrolle"
-            unit=""
-            data={ballControlData}
-            betterDirection="higher"
-            decimals={metricConfig.ball_control.decimals}
-          />
+          {developmentChartMetrics.map((metric) => {
+            const config = metricConfig[metric];
+
+            return (
+              <PerformanceLineChart
+                key={metric}
+                title={config.label}
+                unit={config.unit}
+                data={timeSeriesByMetric[metric]}
+                betterDirection={config.betterDirection}
+                decimals={config.decimals}
+              />
+            );
+          })}
           <ZIndexChart points={zIndexData.points} series={zIndexData.series} />
         </div>
       </section>

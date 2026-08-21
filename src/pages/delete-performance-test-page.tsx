@@ -1,13 +1,12 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { fetchParticipantById, fetchPerformanceTest, queryKeys } from "@/lib/data";
 import { deletePerformanceTest } from "@/lib/mutations";
+import { useMutationWithError } from "@/lib/use-mutation-with-error";
 import { NotFoundPage } from "@/pages/not-found-page";
 
 export function DeletePerformanceTestPage() {
   const { id, testId } = useParams<{ id: string; testId: string }>();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -23,7 +22,7 @@ export function DeletePerformanceTestPage() {
     enabled: !!id && !!testId,
   });
 
-  const mutation = useMutation({
+  const { mutation, errorMessage } = useMutationWithError({
     mutationFn: async () => {
       if (!id || !testId) {
         throw new Error("Fehlende IDs.");
@@ -41,9 +40,7 @@ export function DeletePerformanceTestPage() {
         navigate(`/athletes/${id}`);
       }
     },
-    onError: (error) => {
-      setErrorMessage(error instanceof Error ? error.message : "Löschen fehlgeschlagen.");
-    },
+    errorFallback: "Löschen fehlgeschlagen.",
   });
 
   if (participantQuery.isPending || testQuery.isPending) {

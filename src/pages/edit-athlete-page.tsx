@@ -1,14 +1,13 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { fetchParticipantById, queryKeys } from "@/lib/data";
 import { parseNullableNumber, parseParticipantType, requireString } from "@/lib/forms";
 import { updateParticipant } from "@/lib/mutations";
+import { useMutationWithError } from "@/lib/use-mutation-with-error";
 import { NotFoundPage } from "@/pages/not-found-page";
 
 export function EditAthletePage() {
   const { id } = useParams<{ id: string }>();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -18,7 +17,7 @@ export function EditAthletePage() {
     enabled: !!id,
   });
 
-  const mutation = useMutation({
+  const { mutation, errorMessage } = useMutationWithError({
     mutationFn: async (formData: FormData) => {
       const name = requireString(formData.get("name"), "Name");
       const participantType = parseParticipantType(formData.get("participant_type"));
@@ -44,9 +43,7 @@ export function EditAthletePage() {
         navigate(`/athletes/${id}`);
       }
     },
-    onError: (error) => {
-      setErrorMessage(error instanceof Error ? error.message : "Aktualisierung fehlgeschlagen.");
-    },
+    errorFallback: "Aktualisierung fehlgeschlagen.",
   });
 
   if (participantQuery.isPending) {
@@ -83,7 +80,6 @@ export function EditAthletePage() {
         className="max-w-xl space-y-6 rounded-xl border border-card-border bg-card p-6"
         onSubmit={(event) => {
           event.preventDefault();
-          setErrorMessage(null);
           mutation.mutate(new FormData(event.currentTarget));
         }}
       >

@@ -1,16 +1,15 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { parseNullableNumber, parseParticipantType, requireString } from "@/lib/forms";
 import { createParticipant } from "@/lib/mutations";
 import { queryKeys } from "@/lib/data";
+import { useMutationWithError } from "@/lib/use-mutation-with-error";
 
 export function NewAthletePage() {
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  const { mutation, errorMessage } = useMutationWithError({
     mutationFn: async (formData: FormData) => {
       const name = requireString(formData.get("name"), "Name");
       const participantType = parseParticipantType(formData.get("participant_type"));
@@ -22,9 +21,7 @@ export function NewAthletePage() {
       await queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
       navigate("/athletes");
     },
-    onError: (error) => {
-      setErrorMessage(error instanceof Error ? error.message : "Speichern fehlgeschlagen.");
-    },
+    errorFallback: "Speichern fehlgeschlagen.",
   });
 
   return (
@@ -37,7 +34,6 @@ export function NewAthletePage() {
         className="max-w-xl space-y-6 rounded-xl border border-card-border bg-card p-6"
         onSubmit={(event) => {
           event.preventDefault();
-          setErrorMessage(null);
           mutation.mutate(new FormData(event.currentTarget));
         }}
       >

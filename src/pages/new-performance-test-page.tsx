@@ -1,15 +1,14 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { PerformanceTestFields } from "@/components/performance-test-fields";
 import { fetchParticipantById, queryKeys } from "@/lib/data";
 import { parsePerformanceTestForm } from "@/lib/forms";
 import { createPerformanceTest } from "@/lib/mutations";
+import { useMutationWithError } from "@/lib/use-mutation-with-error";
 import { NotFoundPage } from "@/pages/not-found-page";
 
 export function NewPerformanceTestPage() {
   const { id } = useParams<{ id: string }>();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -19,7 +18,7 @@ export function NewPerformanceTestPage() {
     enabled: !!id,
   });
 
-  const mutation = useMutation({
+  const { mutation, errorMessage } = useMutationWithError({
     mutationFn: async (formData: FormData) => {
       const values = parsePerformanceTestForm(formData);
 
@@ -39,9 +38,7 @@ export function NewPerformanceTestPage() {
         navigate(`/athletes/${id}`);
       }
     },
-    onError: (error) => {
-      setErrorMessage(error instanceof Error ? error.message : "Speichern fehlgeschlagen.");
-    },
+    errorFallback: "Speichern fehlgeschlagen.",
   });
 
   if (participantQuery.isPending) {
@@ -82,7 +79,6 @@ export function NewPerformanceTestPage() {
         className="max-w-2xl space-y-6 rounded-xl border border-card-border bg-card p-6"
         onSubmit={(event) => {
           event.preventDefault();
-          setErrorMessage(null);
           mutation.mutate(new FormData(event.currentTarget));
         }}
       >

@@ -1,15 +1,14 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { PerformanceTestFields } from "@/components/performance-test-fields";
 import { fetchParticipantById, fetchPerformanceTest, queryKeys } from "@/lib/data";
 import { parsePerformanceTestForm } from "@/lib/forms";
 import { updatePerformanceTest } from "@/lib/mutations";
+import { useMutationWithError } from "@/lib/use-mutation-with-error";
 import { NotFoundPage } from "@/pages/not-found-page";
 
 export function EditPerformanceTestPage() {
   const { id, testId } = useParams<{ id: string; testId: string }>();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -25,7 +24,7 @@ export function EditPerformanceTestPage() {
     enabled: !!id && !!testId,
   });
 
-  const mutation = useMutation({
+  const { mutation, errorMessage } = useMutationWithError({
     mutationFn: async (formData: FormData) => {
       const values = parsePerformanceTestForm(formData);
 
@@ -47,9 +46,7 @@ export function EditPerformanceTestPage() {
         navigate(`/athletes/${id}`);
       }
     },
-    onError: (error) => {
-      setErrorMessage(error instanceof Error ? error.message : "Aktualisierung fehlgeschlagen.");
-    },
+    errorFallback: "Aktualisierung fehlgeschlagen.",
   });
 
   if (participantQuery.isPending || testQuery.isPending) {
@@ -92,7 +89,6 @@ export function EditPerformanceTestPage() {
         className="max-w-2xl space-y-6 rounded-xl border border-card-border bg-card p-6"
         onSubmit={(event) => {
           event.preventDefault();
-          setErrorMessage(null);
           mutation.mutate(new FormData(event.currentTarget));
         }}
       >
