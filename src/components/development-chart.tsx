@@ -2,20 +2,9 @@ import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from "r
 import type { DevelopmentPoint, DevelopmentSeries } from "@/lib/development";
 import { formatMetricValue, metricConfig } from "@/lib/metrics";
 import { computeChartDomain } from "@/lib/chart-domain";
+import { getSeriesColor } from "@/lib/series-colors";
 import type { DevelopmentMetric } from "@/lib/types";
 
-const seriesColors = [
-  "#4d8c79",
-  "#b5651d",
-  "#2f5d50",
-  "#c9a227",
-  "#5b7f77",
-  "#8a4b3b",
-  "#3c6e71",
-  "#a8763e",
-  "#264d43",
-  "#6b4226",
-];
 
 type DevelopmentChartProps = {
   metric: DevelopmentMetric;
@@ -108,12 +97,19 @@ export function DevelopmentChart({ metric, points, series, athleteCount }: Devel
               type="linear"
               dataKey={item.id}
               name={item.label}
-              stroke={seriesColors[index % seriesColors.length]}
+              stroke={getSeriesColor(index)}
               strokeDasharray={item.participantType === "reference" ? "5 4" : undefined}
               strokeWidth={2}
               dot={{ r: 3 }}
               activeDot={{ r: 5 }}
-              connectNulls={false}
+              // Seit dem X-Achsen-Fix enthält `points` auch Altersklassen, in
+              // denen NUR andere Personen einen Wert haben. Bei `false` würde
+              // Recharts die Linie an jeder solchen individuellen Lücke
+              // komplett abbrechen (viele isolierte Punkte statt einer Linie).
+              // `true` verbindet stattdessen direkt den letzten mit dem
+              // nächsten echten Wert dieser Person, ohne einen Wert für die
+              // übersprungene Altersklasse zu erfinden.
+              connectNulls
             />
           ))}
         </LineChart>

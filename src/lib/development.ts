@@ -29,7 +29,9 @@ type BuildDevelopmentDataOptions = {
  * Baut die Datenstruktur für den Entwicklungsvergleich auf: eine Linie pro Athlet:in
  * über die sportliche Entwicklungsreihenfolge
  * U12.3 → U12.2 → U12.1 → U13 → U14 → U16.2 → U16.1.
- * Fehlende Tests werden nicht künstlich aufgefüllt.
+ * Fehlende Tests werden nicht künstlich aufgefüllt – der Chart überspringt
+ * sie stattdessen beim Zeichnen der Linie (siehe `connectNulls` in
+ * `development-chart.tsx`), statt einen erfundenen Wert einzusetzen.
  */
 export function buildDevelopmentData(
   tests: ComparisonTest[],

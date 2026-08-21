@@ -9,19 +9,7 @@ import {
 } from "recharts";
 import type { ProfilePoint, ProfileSeries } from "@/lib/profile";
 import { formatMetricValue, metricConfig } from "@/lib/metrics";
-
-const seriesColors = [
-  "#4d8c79",
-  "#b5651d",
-  "#2f5d50",
-  "#c9a227",
-  "#5b7f77",
-  "#8a4b3b",
-  "#3c6e71",
-  "#a8763e",
-  "#264d43",
-  "#6b4226",
-];
+import { getSeriesColor } from "@/lib/series-colors";
 
 type PerformanceRadarChartProps = {
   points: ProfilePoint[];
@@ -133,8 +121,8 @@ export function PerformanceRadarChart({
               key={item.id}
               dataKey={item.id}
               name={item.label}
-              stroke={seriesColors[index % seriesColors.length]}
-              fill={seriesColors[index % seriesColors.length]}
+              stroke={getSeriesColor(index)}
+              fill={getSeriesColor(index)}
               fillOpacity={0.12}
               strokeWidth={2}
               strokeDasharray={item.participantType === "reference" ? "5 4" : undefined}
